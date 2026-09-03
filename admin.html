@@ -937,7 +937,7 @@
       cancelEditBtn.style.display = 'none';
     }
 
-    // Сохранение товара с автоматической оптимизацией фото
+    // Сохранение товара (пакетный коммит через Git Data API в 1 действие)
     productForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const token = tokenInput.value.trim();
@@ -945,37 +945,67 @@
       const repo = repoInput.value.trim();
 
       submitBtn.disabled = true;
-      showStatus('loading', '⏳ Обработка и сжатие фотографий...');
+      showStatus('loading', '⏳ Подготовка файлов к отправке...');
 
       try {
+        const branchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/branches/main`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!branchRes.ok) throw new Error('Не удалось получить данные ветки main');
+        const branchData = await branchRes.json();
+        const baseCommitSha = branchData.commit.sha;
+        const baseTreeSha = branchData.commit.commit.tree.sha;
+
+        const treeItems = [];
+
+        // Помечаем старые фото на удаление
         if (imagesToDeleteFromGithub.length > 0) {
-          showStatus('loading', '⏳ Удаление старых фото с GitHub...');
           for (const imgPath of imagesToDeleteFromGithub) {
-            await deleteImageFromGithub(imgPath);
+            treeItems.push({
+              path: imgPath,
+              mode: '100644',
+              type: 'blob',
+              sha: null
+            });
           }
         }
 
         let finalImages = [];
         const timestamp = Date.now();
 
+        // Заливаем новые фото как Blobs (коммиты НЕ создаются)
         for (let i = 0; i < formImages.length; i++) {
           const item = formImages[i];
           if (item.type === 'existing') {
             finalImages.push(item.src);
           } else if (item.type === 'new' && item.file) {
-            showStatus('loading', `⏳ Оптимизация и загрузка фото ${i + 1} из ${formImages.length}...`);
+            showStatus('loading', `⏳ Сжатие и заливка blob фото ${i + 1} из ${formImages.length}...`);
             
-            // Автоматическое сжатие перед загрузкой
             const { base64, ext } = await compressImageFile(item.file, 1400, 0.82);
             const filePath = `images/prod_${timestamp}_${i + 1}.${ext}`;
 
-            const imgRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
-              method: 'PUT',
-              headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-              body: JSON.stringify({ message: `Upload optimized image ${filePath}`, content: base64 })
+            const blobRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/blobs`, {
+              method: 'POST',
+              headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                content: base64,
+                encoding: 'base64'
+              })
             });
 
-            if (!imgRes.ok) throw new Error(`Ошибка загрузки фото: ${imgRes.statusText}`);
+            if (!blobRes.ok) throw new Error(`Ошибка загрузки blob: ${blobRes.statusText}`);
+            const blobData = await blobRes.json();
+
+            treeItems.push({
+              path: filePath,
+              mode: '100644',
+              type: 'blob',
+              sha: blobData.sha
+            });
+
             finalImages.push(filePath);
           }
         }
@@ -1002,8 +1032,54 @@
           allProducts.unshift(updatedItem);
         }
 
-        await saveProductsToGithub(`Обновлен товар: ${updatedItem.title}`);
-        showStatus('success', '✅ Товар сохранен (фото оптимизированы)!');
+        // Кладём products.json прямо в дерево
+        treeItems.push({
+          path: 'products.json',
+          mode: '100644',
+          type: 'blob',
+          content: JSON.stringify(allProducts, null, 2)
+        });
+
+        showStatus('loading', '⏳ Создание единого коммита...');
+
+        // 1. Создаём Tree с изменениями
+        const treeRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            base_tree: baseTreeSha,
+            tree: treeItems
+          })
+        });
+        if (!treeRes.ok) throw new Error(`Ошибка создания tree: ${treeRes.statusText}`);
+        const treeData = await treeRes.json();
+
+        // 2. Создаём Commit
+        const commitMessage = isEdit ? `Обновлен товар: ${updatedItem.title}` : `Добавлен товар: ${updatedItem.title}`;
+        const commitRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/commits`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: commitMessage,
+            tree: treeData.sha,
+            parents: [baseCommitSha]
+          })
+        });
+        if (!commitRes.ok) throw new Error(`Ошибка создания коммита: ${commitRes.statusText}`);
+        const commitData = await commitRes.json();
+
+        // 3. Сдвигаем ветку main на новый коммит
+        const updateRefRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/refs/heads/main`, {
+          method: 'PATCH',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sha: commitData.sha,
+            force: false
+          })
+        });
+        if (!updateRefRes.ok) throw new Error(`Ошибка обновления ветки: ${updateRefRes.statusText}`);
+
+        showStatus('success', '✅ Товар и фото успешно сохранены строго одним коммитом!');
         resetForm();
         renderProductsList();
       } catch (err) {

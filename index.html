@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Каталог товаров - Pogodin_3d</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <style>
+    :root {
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --card-border: #2a2a2a;
+      --card-hover-border: #3f3f46;
+      --gallery-bg: #18181b;
+      --thumb-bar-bg: #141414;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent: #4ade80;
+      --input-bg: #1e1e1e;
+      --input-border: #3f3f46;
+      --btn-nav-bg: #27272a;
+      --btn-nav-border: #3f3f46;
+      --btn-nav-text: #e5e7eb;
+      --shadow: rgba(0, 0, 0, 0.5);
+    }
+
+    [data-theme="light"] {
+      --bg-color: #f3f4f6;
+      --card-bg: #ffffff;
+      --card-border: #e5e7eb;
+      --card-hover-border: #d1d5db;
+      --gallery-bg: #f9fafb;
+      --thumb-bar-bg: #f3f4f6;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --accent: #16a34a;
+      --input-bg: #ffffff;
+      --input-border: #d1d5db;
+      --btn-nav-bg: #ffffff;
+      --btn-nav-border: #d1d5db;
+      --btn-nav-text: #1f2937;
+      --shadow: rgba(0, 0, 0, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    
+    .no-transitions, .no-transitions * {
+      transition: none !important;
+    }
+
+    body { background: var(--bg-color); color: var(--text-main); padding: 16px 12px; }
+    
+    .container { max-width: 1080px; margin: 0 auto; }
+    
+    /* Верхняя панель */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .nav-links { display: flex; gap: 10px; }
+    .nav-btn {
+      background: var(--btn-nav-bg);
+      color: var(--btn-nav-text);
+      border: 1px solid var(--btn-nav-border);
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+    
+    .theme-toggle-btn {
+      background: var(--btn-nav-bg);
+      color: var(--btn-nav-text);
+      border: 1px solid var(--btn-nav-border);
+      padding: 8px 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .theme-toggle-btn:hover { border-color: var(--accent); }
+
+    /* Шапка */
+    header { 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 24px; 
+      padding: 6px 0; 
+    }
+    h1 { 
+      font-size: 22px; 
+      font-weight: 700; 
+      color: var(--text-main); 
+      letter-spacing: 0.5px;
+      line-height: 1.3;
+      text-align: center;
+    }
+    .header-logo {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      box-shadow: 0 4px 10px var(--shadow);
+      border: 2px solid var(--card-border);
+      transition: transform 0.3s;
+    }
+    .header-logo:hover {
+      transform: rotate(15deg) scale(1.05);
+    }
+
+    @media (max-width: 600px) {
+      header {
+        flex-direction: column-reverse;
+        gap: 10px;
+      }
+      .header-logo {
+        width: 64px;
+        height: 64px;
+      }
+    }
+    
+    /* Контролы */
+    .controls { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 20px; }
+    
+    .dropdown-wrapper { width: 100%; max-width: 450px; position: relative; }
+    .catalog-btn {
+      width: 100%;
+      background: var(--btn-nav-bg);
+      color: var(--btn-nav-text);
+      border: 1px solid var(--btn-nav-border);
+      padding: 12px 16px;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .catalog-btn:hover { border-color: var(--accent); }
+    
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      box-shadow: 0 10px 25px var(--shadow);
+      z-index: 100;
+      overflow: hidden;
+    }
+    .dropdown-menu.show { display: block; }
+    
+    .dropdown-item {
+      padding: 12px 16px;
+      color: var(--text-main);
+      text-align: center;
+      cursor: pointer;
+      font-size: 14px;
+      border-bottom: 1px solid var(--card-border);
+      transition: background 0.2s, color 0.2s;
+    }
+    .dropdown-item:last-child { border-bottom: none; }
+    .dropdown-item:hover { background: var(--gallery-bg); color: var(--accent); }
+
+    .cat-count {
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: normal;
+      margin-left: 4px;
+    }
+    
+    .current-category-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+
+    .reset-view-btn {
+      display: inline-block;
+      margin-top: 6px;
+      color: var(--accent);
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .search-box { width: 100%; max-width: 450px; }
+    .search-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    
+    /* ПАГИНАЦИЯ */
+    .pagination-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      margin: 18px 0;
+      flex-wrap: wrap;
+    }
+    .page-btn {
+      background: var(--btn-nav-bg);
+      color: var(--btn-nav-text);
+      border: 1px solid var(--btn-nav-border);
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .page-btn:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .page-btn.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      cursor: default;
+    }
+    .page-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .page-info {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0 4px;
+      font-weight: 600;
+    }
+
+    /* СЕТКА И КАРТОЧКА: АППАРАТНАЯ ИЗОЛЯЦИЯ */
+    .grid {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: row;
+      box-shadow: 0 4px 6px -1px var(--shadow);
+      position: relative;
+      content-visibility: auto;
+      contain-intrinsic-size: 0 280px;
+    }
+
+    .share-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(18, 18, 18, 0.85);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.2s;
+    }
+    .share-btn:hover {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      transform: scale(1.1);
+    }
+    .share-btn.copied {
+      width: auto;
+      border-radius: 17px;
+      padding: 0 10px;
+      background: var(--accent);
+      color: #000;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    
+    /* Галерея карточки ПК */
+    .card-gallery { 
+      width: 320px; 
+      min-width: 320px;
+      max-width: 340px;
+      display: flex; 
+      flex-direction: column; 
+      background: var(--gallery-bg); 
+      position: relative; 
+      flex-shrink: 0;
+    }
+    
+    .main-img { 
+      width: 100%; 
+      height: 240px; 
+      object-fit: cover; 
+      display: block; 
+      cursor: zoom-in;
+      transition: opacity 0.2s;
+    }
+    .main-img:hover { opacity: 0.95; }
+
+    .thumbnails { display: flex; gap: 6px; padding: 8px; background: var(--thumb-bar-bg); overflow-x: auto; }
+    .thumb-img {
+      width: 46px;
+      height: 46px;
+      object-fit: cover;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      opacity: 0.6;
+      transition: all 0.2s;
+    }
+    .thumb-img:hover, .thumb-img.active { opacity: 1; border-color: var(--accent); }
+    
+    /* Контент карточки ПК */
+    .card-content { 
+      padding: 20px 24px; 
+      display: flex; 
+      flex-direction: column; 
+      flex-grow: 1; 
+      justify-content: space-between;
+      min-width: 0;
+    }
+    .card-title { font-size: 19px; font-weight: 700; margin-bottom: 8px; color: var(--text-main); word-break: break-word; }
+    
+    .card-desc-preview {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      line-height: 1.4;
+      white-space: pre-line;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      word-break: break-word;
+    }
+
+    .open-modal-btn {
+      color: var(--accent);
+      background: none;
+      border: none;
+      padding: 4px 0;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 12px;
+      text-decoration: underline;
+      align-self: flex-start;
+      touch-action: manipulation;
+    }
+    .open-modal-btn:hover {
+      opacity: 0.85;
+    }
+    
+    /* НИЖНЯЯ ПАНЕЛЬ КАРТОЧКИ */
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--card-border);
+    }
+    .card-price { 
+      font-size: 20px; 
+      font-weight: 700; 
+      white-space: nowrap; 
+    }
+    .price-label { color: var(--text-main); font-weight: 600; margin-right: 4px; }
+    .price-value { color: var(--accent); }
+    
+    .actions { 
+      display: flex; 
+      flex-direction: row; 
+      gap: 10px; 
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #fff;
+      text-decoration: none;
+      padding: 9px 15px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn-tg { background: #229ED9; }
+    .btn-inst { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+    
+    /* ТЕЛЕФОННАЯ ВЕРСИЯ КАРТОЧКИ */
+    @media (max-width: 600px) {
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      .card {
+        flex-direction: column;
+        contain-intrinsic-size: 0 420px;
+      }
+      .card-gallery {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+      }
+      .main-img {
+        height: 220px;
+      }
+      .card-content {
+        padding: 16px;
+      }
+      .card-title {
+        font-size: 17px;
+      }
+      .card-footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        margin-top: 8px;
+        padding-top: 10px;
+      }
+      .card-price {
+        font-size: 18px;
+      }
+      .actions {
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+      }
+      .btn {
+        width: 100%;
+        padding: 10px 12px;
+        font-size: 13px;
+        border-radius: 6px;
+      }
+    }
+
+    /* МОДАЛЬНОЕ ОКНО ДЕТАЛЕЙ ТОВАРА */
+    .detail-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.92);
+      z-index: 1040;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    .detail-modal.active {
+      display: flex;
+    }
+    .detail-modal-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 960px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: row;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    }
+
+    .detail-modal-header-actions {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 20;
+    }
+
+    .detail-modal-btn {
+      background: rgba(18, 18, 18, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      color: #fff;
+      transition: background 0.2s, transform 0.2s, border-color 0.2s;
+    }
+    .detail-modal-btn svg {
+      stroke: #fff;
+      display: block;
+      pointer-events: none;
+    }
+    .detail-modal-btn:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      transform: scale(1.1);
+      color: #000;
+    }
+    .detail-modal-btn:hover svg {
+      stroke: #000;
+    }
+
+    .detail-modal-btn.copied {
+      width: auto;
+      border-radius: 18px;
+      padding: 0 10px;
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .detail-modal-gallery {
+      width: 380px;
+      min-width: 380px;
+      background: var(--gallery-bg);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    .detail-modal-main-img {
+      width: 100%;
+      height: 320px;
+      object-fit: cover;
+      cursor: zoom-in;
+    }
+    .detail-modal-body {
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      max-height: 90vh;
+      min-width: 0;
+    }
+    .detail-modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 12px;
+      line-height: 1.3;
+      padding-right: 86px;
+      word-break: break-word;
+    }
+    .detail-modal-desc {
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--text-muted);
+      white-space: pre-line;
+      margin-bottom: 20px;
+      word-break: break-word;
+    }
+    .detail-modal-footer {
+      margin-top: auto;
+      padding-top: 14px;
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 760px) {
+      .detail-modal-box {
+        flex-direction: column;
+        max-height: 92vh;
+      }
+      .detail-modal-gallery {
+        width: 100%;
+        min-width: 0;
+      }
+      .detail-modal-main-img {
+        height: 230px;
+      }
+      .detail-modal-body {
+        padding: 16px;
+      }
+      .detail-modal-title {
+        font-size: 17px;
+        padding-right: 74px;
+      }
+      .detail-modal-desc {
+        font-size: 13.5px;
+      }
+      .detail-modal-footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+      .detail-modal-footer .actions {
+        flex-direction: column;
+      }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 0;
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    /* ПОЛНОЭКРАННЫЙ ЛАЙТБОКС */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.96);
+      z-index: 1080;
+      user-select: none;
+      overflow: hidden;
+      touch-action: none;
+    }
+    .lightbox.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .lightbox-content {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      cursor: default;
+    }
+    .lightbox-img {
+      max-width: 94vw;
+      max-height: 84vh;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      transform-origin: center center;
+      will-change: transform;
+      cursor: zoom-in;
+    }
+    .lightbox-img.zoomed { cursor: grab; }
+    .lightbox-img.zoomed.grabbing { cursor: grabbing; }
+    .lightbox-counter {
+      position: absolute;
+      bottom: 24px;
+      color: #9ca3af;
+      font-size: 14px;
+      font-weight: 600;
+      background: rgba(0,0,0,0.75);
+      padding: 5px 14px;
+      border-radius: 14px;
+      pointer-events: none;
+      z-index: 1085;
+    }
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 25px;
+      color: #fff;
+      font-size: 38px;
+      font-weight: bold;
+      cursor: pointer;
+      background: none;
+      border: none;
+      outline: none;
+      line-height: 1;
+      padding: 8px;
+      z-index: 1090;
+      transition: transform 0.2s, color 0.2s;
+    }
+    .lightbox-close:hover {
+      color: var(--accent);
+      transform: scale(1.15);
+    }
+    
+    .lightbox-nav {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      outline: none;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1085;
+      transition: background 0.2s, transform 0.2s;
+      padding: 0;
+    }
+    .lightbox-nav:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-50%) scale(1.1);
+    }
+    .lightbox-nav svg {
+      width: 24px;
+      height: 24px;
+      stroke: #fff;
+      stroke-width: 2.5;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      display: block;
+      pointer-events: none;
+    }
+    .lightbox-prev { left: 24px; }
+    .lightbox-next { right: 24px; }
+    
+    @media (max-width: 600px) {
+      .lightbox-nav {
+        width: 42px;
+        height: 42px;
+      }
+      .lightbox-nav svg {
+        width: 20px;
+        height: 20px;
+      }
+      .lightbox-prev { left: 12px; }
+      .lightbox-next { right: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="top-bar">
+      <div class="nav-links">
+        <a href="delivery.html" class="nav-btn">Доставка</a>
+        <a href="about.html" class="nav-btn">Обо мне</a>
+      </div>
+      <button class="theme-toggle-btn" id="themeToggleBtn" title="Переключить тему">🌙</button>
+    </div>
+
+    <header>
+      <h1>Добро пожаловать в мастерскую 3D печати Pogodin_3d</h1>
+      <img src="logo.png" alt="Логотип Pogodin_3d" class="header-logo" width="54" height="54">
+    </header>
+
+    <div class="controls">
+      <div class="dropdown-wrapper" id="dropdownWrap">
+        <button class="catalog-btn" id="dropdownBtn">Разделы каталога ▾</button>
+        <div class="dropdown-menu" id="dropdownMenu"></div>
+      </div>
+
+      <div class="current-category-title" id="categoryTitle">Все товары</div>
+      <div id="resetViewWrap" style="display:none;">
+        <span class="reset-view-btn" onclick="resetSingleView()">← Показать весь каталог</span>
+      </div>
+
+      <div class="search-box" id="searchWrap">
+        <input type="text" id="searchInput" class="search-input" placeholder="Поиск по всему каталогу...">
+      </div>
+    </div>
+
+    <!-- ВЕРХНЯЯ ПАГИНАЦИЯ -->
+    <div class="pagination-bar" id="paginationTop" style="display:none;"></div>
+
+    <div class="grid" id="catalog"></div>
+
+    <!-- НИЖНЯЯ ПАГИНАЦИЯ -->
+    <div class="pagination-bar" id="paginationBottom" style="display:none;"></div>
+  </div>
+
+  <!-- ОТДЕЛЬНОЕ ОКНО ПОДРОБНОЙ ИНФОРМАЦИИ О ТОВАРЕ -->
+  <div class="detail-modal" id="detailModal" onclick="closeDetailModalOnBackdrop(event)">
+    <div class="detail-modal-box" id="detailModalBox">
+      <div class="detail-modal-header-actions">
+        <button class="detail-modal-btn" id="modalShareBtn" title="Поделиться ссылкой на товар">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 17L17 7M17 7H7M17 7V17"/>
+          </svg>
+        </button>
+        <button class="detail-modal-btn" onclick="closeDetailModal()" title="Закрыть (Esc)">
+          <svg width="18" height="18" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="detail-modal-gallery" id="modalGallery"></div>
+      <div class="detail-modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- ПОЛНОЭКРАННЫЙ ЗУМ (ЛАЙТБОКС) -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightboxClose" title="Закрыть (Esc)">&times;</button>
+    
+    <button class="lightbox-nav lightbox-prev" id="lightboxPrev" title="Предыдущее фото (←)">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    
+    <div class="lightbox-content" id="lightboxContent">
+      <img src="" alt="Увеличенное фото" class="lightbox-img" id="lightboxImg">
+      <div class="lightbox-counter" id="lightboxCounter"></div>
+    </div>
+    
+    <button class="lightbox-nav lightbox-next" id="lightboxNext" title="Следующее фото (→)">
+      <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>
+  </div>
+
+  <script>
+    const TG_USERNAME = "pogodin_3d_bot";
+    const INST_USERNAME = "Pogodin_3d";
+    const ITEMS_PER_PAGE = 10;
+
+    const NO_PHOTO_PLACEHOLDER = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400"><rect width="100%" height="100%" fill="%2318181b"/><g transform="translate(250,75) scale(4.2)" stroke="%233f3f46" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></g><text x="50%" y="275" dominant-baseline="middle" text-anchor="middle" fill="%2371717a" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="32" font-weight="900" letter-spacing="2">ФОТО ОТСУТСТВУЕТ</text></svg>';
+
+    let categories = { all: "Все товары" };
+    let currentCategory = 'all';
+    let products = [];
+    let singleItemId = null;
+    let currentPage = 1;
+
+    const catalogContainer = document.getElementById('catalog');
+    const dropdownBtn = document.getElementById('dropdownBtn');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    const categoryTitle = document.getElementById('categoryTitle');
+    const searchInput = document.getElementById('searchInput');
+    const searchWrap = document.getElementById('searchWrap');
+    const dropdownWrap = document.getElementById('dropdownWrap');
+    const resetViewWrap = document.getElementById('resetViewWrap');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const paginationTop = document.getElementById('paginationTop');
+    const paginationBottom = document.getElementById('paginationBottom');
+
+    const detailModal = document.getElementById('detailModal');
+    const modalShareBtn = document.getElementById('modalShareBtn');
+    const modalGallery = document.getElementById('modalGallery');
+    const modalBody = document.getElementById('modalBody');
+
+    const lightbox = document.getElementById('lightbox');
+    const lightboxContent = document.getElementById('lightboxContent');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxClose = document.getElementById('lightboxClose');
+    const lightboxPrev = document.getElementById('lightboxPrev');
+    const lightboxNext = document.getElementById('lightboxNext');
+    const lightboxCounter = document.getElementById('lightboxCounter');
+
+    let currentLightboxImages = [];
+    let currentLightboxIndex = 0;
+
+    function formatDesc(text) {
+      if (!text) return '';
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>')
+        .replace(/\*\*(.*?)\*\*/g, '<em>$1</em>')
+        .replace(/\*(.*?)\*/g, '<strong>$1</strong>')
+        .replace(/_(.*?)_/g, '<u>$1</u>');
+    }
+
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    themeToggleBtn.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+
+    themeToggleBtn.addEventListener('click', () => {
+      document.documentElement.classList.add('no-transitions');
+
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      themeToggleBtn.textContent = next === 'dark' ? '🌙' : '☀️';
+
+      setTimeout(() => {
+        document.documentElement.classList.remove('no-transitions');
+      }, 50);
+    });
+
+    dropdownBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdownMenu.classList.toggle('show');
+    });
+    document.addEventListener('click', () => dropdownMenu.classList.remove('show'));
+
+    async function initCatalog() {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('item')) {
+        singleItemId = urlParams.get('item');
+      }
+
+      try {
+        const prodRes = await fetch('products.json?t=' + Date.now());
+        if (prodRes.ok) {
+          products = await prodRes.json();
+        }
+
+        const catRes = await fetch('categories.json?t=' + Date.now());
+        if (catRes.ok) {
+          const catList = await catRes.json();
+          categories = { all: "Все товары" };
+          catList.forEach(c => categories[c.id] = c.name);
+        }
+
+        renderCategoriesMenu();
+        renderProducts();
+      } catch (err) {
+        console.error('Ошибка загрузки данных:', err);
+      }
+    }
+
+    function renderCategoriesMenu() {
+      dropdownMenu.innerHTML = '';
+      for (const [id, name] of Object.entries(categories)) {
+        let count = 0;
+        if (id === 'all' || id === 'new') {
+          count = products.length;
+        } else {
+          count = products.filter(p => p.category === id).length;
+        }
+
+        const item = document.createElement('div');
+        item.className = 'dropdown-item';
+        item.setAttribute('data-cat', id);
+        item.innerHTML = `${name} <span class="cat-count">(${count})</span>`;
+
+        item.addEventListener('click', () => {
+          singleItemId = null;
+          currentCategory = id;
+          currentPage = 1;
+          searchInput.value = '';
+          resetViewWrap.style.display = 'none';
+          searchWrap.style.display = 'block';
+          dropdownWrap.style.display = 'block';
+          window.history.pushState({}, '', window.location.pathname);
+          renderProducts();
+        });
+        dropdownMenu.appendChild(item);
+      }
+    }
+
+    // Дебаунс поиска с паузой в 1 секунду (1000 мс)
+    let searchDebounceTimer = null;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchDebounceTimer);
+      
+      // Показываем, что поиск ждёт паузы
+      searchInput.style.borderColor = '#f59e0b'; // желтая рамка пока печатаешь
+
+      searchDebounceTimer = setTimeout(() => {
+        currentPage = 1;
+        renderProducts();
+        searchInput.style.borderColor = ''; // возвращаем цвет рамки
+      }, 500); // Ровно 1 секунда паузы после последнего нажатия клавиши!
+    });
+
+    window.resetSingleView = function() {
+      singleItemId = null;
+      currentPage = 1;
+      window.history.pushState({}, '', window.location.pathname);
+      resetViewWrap.style.display = 'none';
+      searchWrap.style.display = 'block';
+      dropdownWrap.style.display = 'block';
+      renderProducts();
+    };
+
+    window.shareProduct = function(btn, productId, title) {
+      const shareUrl = `${window.location.origin}${window.location.pathname}?item=${productId}`;
+
+      if (navigator.share) {
+        navigator.share({
+          title: `Pogodin_3d: ${title}`,
+          text: `Смотри что есть у pogodin_3d: ${title}`,
+          url: shareUrl
+        }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+          const originalContent = btn.innerHTML;
+          btn.classList.add('copied');
+          btn.textContent = 'Скопировано! ✓';
+          setTimeout(() => {
+            btn.classList.remove('copied');
+            btn.innerHTML = originalContent;
+          }, 2000);
+        });
+      }
+    };
+
+    // ==========================================
+    // ОКНО ПОДРОБНОЙ ИНФОРМАЦИИ О ТОВАРЕ
+    // ==========================================
+    window.openDetailModal = function(productId) {
+      const item = products.find(p => p.id === productId);
+      if (!item) return;
+
+      const rawPrice = String(item.price).replace(/[^\d\s.,]/g, '').trim();
+      const msgText = `Здравствуйте! Хочу сделать заказ в Pogodin_3d: "${item.title}" за ${rawPrice} рублей. Подскажите по срокам изготовления.`;
+      const tgLink = `https://t.me/${TG_USERNAME}?text=${encodeURIComponent(msgText)}`;
+      const instLink = `https://ig.me/m/${INST_USERNAME}`;
+
+      const validImages = (item.images || []).filter(img => img && String(img).trim().length > 0);
+      const hasImages = validImages.length > 0;
+      const firstImg = hasImages ? validImages[0] : NO_PHOTO_PLACEHOLDER;
+
+      modalShareBtn.onclick = function() {
+        shareProduct(this, item.id, item.title);
+      };
+
+      let modalThumbsHtml = '';
+      if (hasImages && validImages.length > 1) {
+        modalThumbsHtml = `
+          <div class="thumbnails">
+            ${validImages.map((img, idx) => `
+              <img src="${img}" class="thumb-img ${idx === 0 ? 'active' : ''}" loading="lazy" decoding="async" onerror="this.onerror=null; this.src=NO_PHOTO_PLACEHOLDER;" onclick="changeModalImage(this, ${item.id}, ${idx})">
+            `).join('')}
+          </div>
+        `;
+      }
+
+      const imgClickAttr = hasImages ? `onclick="openLightbox(${item.id})" title="Нажмите, чтобы увеличить"` : `style="cursor:default;"`;
+
+      modalGallery.innerHTML = `
+        <img src="${firstImg}" alt="${item.title}" class="detail-modal-main-img" id="modal-main-img-${item.id}" data-active-index="0" decoding="async" onerror="this.onerror=null; this.src=NO_PHOTO_PLACEHOLDER;" ${imgClickAttr}>
+        ${modalThumbsHtml}
+      `;
+
+      modalBody.innerHTML = `
+        <div class="detail-modal-title">${item.title}</div>
+        <div class="detail-modal-desc">${formatDesc(item.desc)}</div>
+        <div class="detail-modal-footer">
+          <div class="card-price">
+            <span class="price-label">Цена:</span>
+            <span class="price-value">${rawPrice} ₽</span>
+          </div>
+          <div class="actions">
+            <a href="${tgLink}" target="_blank" class="btn btn-tg">Заказать в Telegram</a>
+            <a href="${instLink}" target="_blank" class="btn btn-inst">Заказать в Instagram</a>
+          </div>
+        </div>
+      `;
+
+      document.body.style.overflow = 'hidden';
+      detailModal.classList.add('active');
+    };
+
+    window.closeDetailModal = function() {
+      detailModal.classList.remove('active');
+      modalGallery.innerHTML = '';
+      modalBody.innerHTML = '';
+      if (!lightbox.classList.contains('active')) {
+        document.body.style.overflow = '';
+      }
+    };
+
+    window.closeDetailModalOnBackdrop = function(e) {
+      if (e.target === detailModal) {
+        closeDetailModal();
+      }
+    };
+
+    window.changeModalImage = function(thumbElement, productId, index) {
+      const product = products.find(p => p.id === productId);
+      const validImages = (product.images || []).filter(img => img && String(img).trim().length > 0);
+      const mainImg = document.getElementById(`modal-main-img-${productId}`);
+      mainImg.src = validImages[index] || NO_PHOTO_PLACEHOLDER;
+      mainImg.setAttribute('data-active-index', index);
+      const parentThumbnails = thumbElement.parentElement;
+      parentThumbnails.querySelectorAll('.thumb-img').forEach(t => t.classList.remove('active'));
+      thumbElement.classList.add('active');
+    };
+
+    function renderPagination(totalItems) {
+      const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+
+      if (totalPages <= 1 || singleItemId) {
+        paginationTop.style.display = 'none';
+        paginationBottom.style.display = 'none';
+        paginationTop.innerHTML = '';
+        paginationBottom.innerHTML = '';
+        return;
+      }
+
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      let html = '';
+      html += `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">← Назад</button>`;
+
+      for (let i = 1; i <= totalPages; i++) {
+        if (totalPages > 7) {
+          if (i !== 1 && i !== totalPages && Math.abs(i - currentPage) > 1) {
+            if (i === 2 || i === totalPages - 1) {
+              html += `<span class="page-info">...</span>`;
+            }
+            continue;
+          }
+        }
+        html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+      }
+
+      html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">Вперед →</button>`;
+      html += `<span class="page-info">Стр. ${currentPage} из ${totalPages}</span>`;
+
+      paginationTop.innerHTML = html;
+      paginationBottom.innerHTML = html;
+      paginationTop.style.display = 'flex';
+      paginationBottom.style.display = 'flex';
+    }
+
+    window.goToPage = function(page) {
+      currentPage = page;
+      renderProducts();
+      window.scrollTo({ top: catalogContainer.offsetTop - 120, behavior: 'smooth' });
+    };
+
+    function renderProducts() {
+      catalogContainer.innerHTML = '';
+      const query = searchInput.value.trim().toLowerCase();
+
+      let filtered = [];
+
+      if (singleItemId) {
+        filtered = products.filter(p => String(p.id) === String(singleItemId));
+        if (filtered.length > 0) {
+          categoryTitle.textContent = `Товар: ${filtered[0].title}`;
+          resetViewWrap.style.display = 'block';
+          searchWrap.style.display = 'none';
+          dropdownWrap.style.display = 'none';
+        }
+      } else if (query) {
+        filtered = products.filter(p => p.title.toLowerCase().includes(query) || p.desc.toLowerCase().includes(query));
+        categoryTitle.textContent = `Результаты поиска (${filtered.length})`;
+      } else if (currentCategory === 'all' || currentCategory === 'new') {
+        filtered = [...products];
+        categoryTitle.textContent = `Все товары (${filtered.length})`;
+      } else {
+        filtered = products.filter(p => p.category === currentCategory);
+        const catName = categories[currentCategory] || 'Категория';
+        categoryTitle.textContent = `${catName} (${filtered.length})`;
+      }
+      
+      filtered.sort((a, b) => {
+        const idA = typeof a.id === 'number' ? a.id : parseInt(a.id) || 0;
+        const idB = typeof b.id === 'number' ? b.id : parseInt(b.id) || 0;
+        return idB - idA;
+      });
+
+      renderPagination(filtered.length);
+
+      if (filtered.length === 0) {
+        catalogContainer.innerHTML = '<div class="empty-state">Товар не найден или каталог пуст.</div>';
+        return;
+      }
+
+      let pageItems = filtered;
+      if (!singleItemId) {
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        pageItems = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+      }
+
+      const fragment = document.createDocumentFragment();
+
+      pageItems.forEach((item, itemIdx) => {
+        const rawPrice = String(item.price).replace(/[^\d\s.,]/g, '').trim();
+        const msgText = `Здравствуйте! Хочу сделать заказ в Pogodin_3d: "${item.title}" за ${rawPrice} рублей. Подскажите по срокам изготовления.`;
+        const tgLink = `https://t.me/${TG_USERNAME}?text=${encodeURIComponent(msgText)}`;
+        const instLink = `https://ig.me/m/${INST_USERNAME}`;
+
+        const validImages = (item.images || []).filter(img => img && String(img).trim().length > 0);
+        const hasImages = validImages.length > 0;
+        const firstImg = hasImages ? validImages[0] : NO_PHOTO_PLACEHOLDER;
+        const imgLoading = itemIdx < 2 ? 'eager' : 'lazy';
+
+        let thumbnailsHtml = '';
+        if (hasImages && validImages.length > 1) {
+          thumbnailsHtml = `
+            <div class="thumbnails">
+              ${validImages.map((img, idx) => `
+                <img src="${img}" class="thumb-img ${idx === 0 ? 'active' : ''}" loading="lazy" decoding="async" data-main-target="main-img-${item.id}" data-idx="${idx}" onerror="this.onerror=null; this.src=NO_PHOTO_PLACEHOLDER;" onclick="changeImage(this, ${item.id}, ${idx})">
+              `).join('')}
+            </div>
+          `;
+        }
+
+        const lineCount = (item.desc || '').split('\n').length;
+        const isLongText = (item.desc || '').length > 120 || lineCount > 3;
+        const modalBtnHtml = isLongText ? `<button type="button" class="open-modal-btn" onclick="openDetailModal(${item.id})">Подробнее о товаре →</button>` : '';
+        const imgClickAttr = hasImages ? `onclick="openLightbox(${item.id})" title="Нажмите, чтобы увеличить"` : `style="cursor:default;"`;
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <button class="share-btn" onclick="shareProduct(this, ${item.id}, '${item.title.replace(/'/g, "\\'")}')" title="Поделиться ссылкой на товар">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M7 17L17 7M17 7H7M17 7V17"/>
+            </svg>
+          </button>
+          <div class="card-gallery">
+            <img src="${firstImg}" alt="${item.title}" class="main-img" id="main-img-${item.id}" data-active-index="0" loading="${imgLoading}" decoding="async" onerror="this.onerror=null; this.src=NO_PHOTO_PLACEHOLDER;" ${imgClickAttr}>
+            ${thumbnailsHtml}
+          </div>
+          <div class="card-content">
+            <div>
+              <div class="card-title">${item.title}</div>
+              <div class="card-desc-preview">${formatDesc(item.desc)}</div>
+              ${modalBtnHtml}
+            </div>
+            <div class="card-footer">
+              <div class="card-price">
+                <span class="price-label">Цена:</span>
+                <span class="price-value">${rawPrice} ₽</span>
+              </div>
+              <div class="actions">
+                <a href="${tgLink}" target="_blank" class="btn btn-tg">Заказать в Telegram</a>
+                <a href="${instLink}" target="_blank" class="btn btn-inst">Заказать в Instagram</a>
+              </div>
+            </div>
+          </div>
+        `;
+        fragment.appendChild(card);
+      });
+
+      catalogContainer.appendChild(fragment);
+    }
+
+    window.changeImage = function(thumbElement, productId, index) {
+      const product = products.find(p => p.id === productId);
+      const validImages = (product.images || []).filter(img => img && String(img).trim().length > 0);
+      const mainImg = document.getElementById(`main-img-${productId}`);
+      mainImg.src = validImages[index] || NO_PHOTO_PLACEHOLDER;
+      mainImg.setAttribute('data-active-index', index);
+      const parentThumbnails = thumbElement.parentElement;
+      parentThumbnails.querySelectorAll('.thumb-img').forEach(t => t.classList.remove('active'));
+      thumbElement.classList.add('active');
+    };
+
+    // ==========================================
+    // ЛАЙТБОКС (АППАРАТНАЯ СИНХРОНИЗАЦИЯ ЧЕРЕЗ RAF)
+    // ==========================================
+    let currentScale = 1;
+    let panX = 0;
+    let panY = 0;
+    let isPinching = false;
+    let isPanning = false;
+    let startDist = 0;
+    let startScale = 1;
+    let startPanX = 0;
+    let startPanY = 0;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let lastTapTime = 0;
+    let isMouseDown = false;
+    let mouseStartX = 0;
+    let mouseStartY = 0;
+    let mouseHasMoved = false;
+    let rafPending = false;
+
+    function applyTransform(smooth = false) {
+      lightboxImg.style.transition = smooth ? 'transform 0.2s cubic-bezier(0.25, 1, 0.5, 1)' : 'none';
+      lightboxImg.style.transform = `translate3d(${panX}px, ${panY}px, 0) scale(${currentScale})`;
+      if (currentScale > 1.05) {
+        lightboxImg.classList.add('zoomed');
+      } else {
+        lightboxImg.classList.remove('zoomed', 'grabbing');
+      }
+    }
+
+    function requestFrameTransform() {
+      if (!rafPending) {
+        rafPending = true;
+        requestAnimationFrame(() => {
+          applyTransform(false);
+          rafPending = false;
+        });
+      }
+    }
+
+    function resetZoom(smooth = true) {
+      currentScale = 1;
+      panX = 0;
+      panY = 0;
+      applyTransform(smooth);
+    }
+
+    function clampBounds() {
+      if (currentScale <= 1.05) {
+        panX = 0;
+        panY = 0;
+        return;
+      }
+      const rect = lightboxImg.getBoundingClientRect();
+      const baseWidth = rect.width / currentScale;
+      const baseHeight = rect.height / currentScale;
+      const maxX = Math.max(0, (baseWidth * currentScale - window.innerWidth * 0.9) / 2);
+      const maxY = Math.max(0, (baseHeight * currentScale - window.innerHeight * 0.9) / 2);
+      panX = Math.min(Math.max(panX, -maxX), maxX);
+      panY = Math.min(Math.max(panY, -maxY), maxY);
+    }
+
+    function getDistance(t1, t2) {
+      return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+    }
+
+    window.openLightbox = function(productId) {
+      const product = products.find(p => p.id === productId);
+      const validImages = (product.images || []).filter(img => img && String(img).trim().length > 0);
+      if (!product || validImages.length === 0) return;
+      currentLightboxImages = validImages;
+
+      let activeIdx = 0;
+      const modalImg = document.getElementById(`modal-main-img-${productId}`);
+      const mainImg = document.getElementById(`main-img-${productId}`);
+      if (modalImg && detailModal.classList.contains('active')) {
+        activeIdx = parseInt(modalImg.getAttribute('data-active-index')) || 0;
+      } else if (mainImg) {
+        activeIdx = parseInt(mainImg.getAttribute('data-active-index')) || 0;
+      }
+      currentLightboxIndex = activeIdx;
+
+      document.body.style.overflow = 'hidden';
+      updateLightbox();
+      lightbox.classList.add('active');
+    };
+
+    function updateLightbox() {
+      resetZoom(false);
+      lightboxImg.src = currentLightboxImages[currentLightboxIndex];
+      if (currentLightboxImages.length > 1) {
+        lightboxPrev.style.display = 'flex';
+        lightboxNext.style.display = 'flex';
+        lightboxCounter.style.display = 'block';
+        lightboxCounter.textContent = `${currentLightboxIndex + 1} / ${currentLightboxImages.length}`;
+      } else {
+        lightboxPrev.style.display = 'none';
+        lightboxNext.style.display = 'none';
+        lightboxCounter.style.display = 'none';
+      }
+    }
+
+    function showPrevImage() {
+      currentLightboxIndex = (currentLightboxIndex - 1 + currentLightboxImages.length) % currentLightboxImages.length;
+      updateLightbox();
+    }
+
+    function showNextImage() {
+      currentLightboxIndex = (currentLightboxIndex + 1) % currentLightboxImages.length;
+      updateLightbox();
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove('active');
+      lightboxImg.src = '';
+      resetZoom(false);
+      if (!detailModal.classList.contains('active')) {
+        document.body.style.overflow = '';
+      }
+    }
+
+    lightboxClose.addEventListener('click', (e) => { e.stopPropagation(); closeLightbox(); });
+    lightboxPrev.addEventListener('click', (e) => { e.stopPropagation(); showPrevImage(); });
+    lightboxNext.addEventListener('click', (e) => { e.stopPropagation(); showNextImage(); });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (lightbox.classList.contains('active')) {
+          closeLightbox();
+        } else if (detailModal.classList.contains('active')) {
+          closeDetailModal();
+        }
+      }
+      if (!lightbox.classList.contains('active')) return;
+      if (e.key === 'ArrowLeft') showPrevImage();
+      if (e.key === 'ArrowRight') showNextImage();
+    });
+
+    lightboxContent.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const delta = e.deltaY < 0 ? 0.35 : -0.35;
+      const oldScale = currentScale;
+      let newScale = Math.min(Math.max(1, currentScale + delta), 6);
+
+      if (newScale <= 1.05) {
+        resetZoom(true);
+        return;
+      }
+
+      const ratio = newScale / oldScale;
+      panX *= ratio;
+      panY *= ratio;
+      currentScale = newScale;
+
+      clampBounds();
+      applyTransform(true);
+    }, { passive: false });
+
+    lightboxContent.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      isMouseDown = true;
+      mouseHasMoved = false;
+      mouseStartX = e.clientX;
+      mouseStartY = e.clientY;
+      startPanX = panX;
+      startPanY = panY;
+      if (currentScale > 1.05) {
+        lightboxImg.classList.add('grabbing');
+      }
+    });
+
+    lightboxContent.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isMouseDown) return;
+      const dx = e.clientX - mouseStartX;
+      dy = e.clientY - mouseStartY;
+
+      if (Math.hypot(dx, dy) > 5) {
+        mouseHasMoved = true;
+      }
+
+      if (currentScale > 1.05) {
+        panX = startPanX + dx;
+        panY = startPanY + dy;
+        clampBounds();
+        requestFrameTransform();
+      }
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (!isMouseDown) return;
+      isMouseDown = false;
+      lightboxImg.classList.remove('grabbing');
+
+      if (!mouseHasMoved && currentScale <= 1.05 && (e.target === lightbox || e.target === lightboxContent)) {
+        closeLightbox();
+      }
+    });
+
+    lightboxContent.addEventListener('dblclick', (e) => {
+      if (currentScale > 1.1) {
+        resetZoom(true);
+      } else {
+        currentScale = 2.5;
+        panX = 0;
+        panY = 0;
+        clampBounds();
+        applyTransform(true);
+      }
+    });
+
+    lightboxContent.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        isPinching = true;
+        isPanning = false;
+        startDist = getDistance(e.touches[0], e.touches[1]);
+        startScale = currentScale;
+        startPanX = panX;
+        startPanY = panY;
+      } else if (e.touches.length === 1) {
+        isPinching = false;
+        const touch = e.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+        startPanX = panX;
+        startPanY = panY;
+        isPanning = currentScale > 1.05;
+      }
+    }, { passive: false });
+
+    lightboxContent.addEventListener('touchmove', (e) => {
+      if (isPinching && e.touches.length === 2) {
+        e.preventDefault();
+        const dist = getDistance(e.touches[0], e.touches[1]);
+        const factor = dist / startDist;
+        currentScale = Math.min(Math.max(1, startScale * factor), 6);
+        requestFrameTransform();
+      } else if (isPanning && e.touches.length === 1 && currentScale > 1.05) {
+        e.preventDefault();
+        panX = startPanX + (e.touches[0].clientX - touchStartX);
+        panY = startPanY + (e.touches[0].clientY - touchStartY);
+        clampBounds();
+        requestFrameTransform();
+      }
+    }, { passive: false });
+
+    lightboxContent.addEventListener('touchend', (e) => {
+      const now = Date.now();
+
+      if (isPinching) {
+        if (e.touches.length === 0) {
+          isPinching = false;
+          if (currentScale < 1.1) resetZoom(true);
+          else { clampBounds(); applyTransform(true); }
+        }
+      } else if (isPanning) {
+        if (e.touches.length === 0) {
+          isPanning = false;
+          clampBounds();
+          applyTransform(true);
+        }
+      } else if (e.changedTouches.length === 1) {
+        if (now - lastTapTime < 280) {
+          if (currentScale > 1.1) resetZoom(true);
+          else {
+            currentScale = 2.5;
+            panX = 0;
+            panY = 0;
+            clampBounds();
+            applyTransform(true);
+          }
+          lastTapTime = 0;
+          return;
+        }
+        lastTapTime = now;
+
+        if (currentScale <= 1.05) {
+          const diffX = touchStartX - e.changedTouches[0].clientX;
+          const diffY = touchStartY - e.changedTouches[0].clientY;
+
+          if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY) && currentLightboxImages.length > 1) {
+            if (diffX > 0) showNextImage();
+            else showPrevImage();
+          }
+        }
+      }
+    }, { passive: true });
+
+    initCatalog();
+  </script>
+</body>
+</html>

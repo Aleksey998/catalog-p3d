@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Доставка и оплата — Pogodin_3d</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <style>
+    :root {
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --card-border: #2a2a2a;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent: #4ade80;
+      --btn-nav-bg: #27272a;
+      --btn-nav-border: #3f3f46;
+      --btn-nav-text: #e5e7eb;
+    }
+
+    [data-theme="light"] {
+      --bg-color: #f3f4f6;
+      --card-bg: #ffffff;
+      --card-border: #e5e7eb;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --accent: #16a34a;
+      --btn-nav-bg: #ffffff;
+      --btn-nav-border: #d1d5db;
+      --btn-nav-text: #1f2937;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: var(--bg-color); color: var(--text-main); padding: 20px 14px; transition: background 0.3s, color 0.3s; }
+    .container { max-width: 680px; margin: 20px auto; }
+    
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 28px 24px;
+      border-radius: 12px;
+    }
+
+    h1 { color: var(--accent); font-size: 22px; margin-bottom: 20px; }
+    h2 { font-size: 16px; margin: 18px 0 8px 0; color: var(--text-main); }
+    p, li { line-height: 1.6; color: var(--text-muted); font-size: 15px; margin-bottom: 8px; }
+    ul { padding-left: 20px; margin-bottom: 14px; }
+    
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 16px;
+      background: var(--btn-nav-bg);
+      color: var(--btn-nav-text);
+      border: 1px solid var(--btn-nav-border);
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .back-btn:hover { border-color: var(--accent); color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>Условия доставки и оплаты</h1>
+
+      <h2>🚚 Способы доставки:</h2>
+      <ul>
+        <li><strong>СДЭК:</strong> До пункта выдачи (ПВЗ) или курьером до двери по всей России.</li>
+        <li><strong>Почта России:</strong> В любой населенный пункт.</li>
+        <li><strong>Авито Доставка:</strong> Безопасная сделка через созданное объявление.</li>
+        <li><strong>Яндекс Доставка:</strong> Быстрая доставка по всей России.</li>
+        <li><strong>5post:</strong> Быстрая доставка до постамата.</li>
+        <li><strong>Самовывоз:</strong> МО, г. Балашиха, мкр. Дзержинского.</li>
+      </ul>
+
+      <h2>📦 Упаковка:</h2>
+      <p>Каждый заказ надежно упаковывается в пузырьковую пленку и плотный картон, чтобы исключить любые повреждения при транспортировке.</p>
+
+      <h2>💳 Оплата:</h2>
+      <p>Перевод на карту (СБП) или безопасная сделка через сервисы доставки. Для индивидуальных заказов работаем по предоплате.</p>
+
+      <h2>⏳ Сроки изготовления:</h2>
+      <p>Готовые модели из наличия отправляются в течение 24 часов. Изготовление под заказ — от 1 до 3 рабочих дней в зависимости от объема печати.</p>
+
+      <a href="index.html" class="back-btn">← Вернуться в каталог</a>
+    </div>
+  </div>
+
+  <script>
+    // Подтягиваем тему, выбранную на главной странице
+    document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'dark');
+  </script>
+</body>
+</html>

@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Админка — Pogodin_3d</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: #121212; color: #f3f4f6; padding: 20px 12px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    h1 { font-size: 22px; color: #4ade80; margin-bottom: 20px; text-align: center; }
+    
+    .panel-box {
+      background: #1e1e1e;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    
+    .form-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; color: #fff; border-bottom: 1px solid #333; padding-bottom: 8px; }
+    
+    .form-group { margin-bottom: 14px; }
+    label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: #9ca3af; }
+    input[type="text"], input[type="password"], textarea, select {
+      width: 100%; padding: 10px 12px; background: #141414; border: 1px solid #3f3f46;
+      border-radius: 6px; color: #fff; font-size: 14px; outline: none;
+    }
+    input:focus, textarea:focus, select:focus { border-color: #4ade80; }
+    textarea { resize: vertical; min-height: 120px; line-height: 1.4; white-space: pre-wrap; }
+    
+    .row { display: flex; gap: 12px; }
+    .col { flex: 1; }
+    
+    .btn {
+      padding: 10px 16px; border: none; border-radius: 6px; font-weight: 700;
+      font-size: 13px; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-green { background: #16a34a; color: #fff; width: 100%; }
+    .btn-green:hover { background: #15803d; }
+    .btn-cancel { background: #3f3f46; color: #fff; display: none; }
+    .btn-cancel:hover { background: #52525b; }
+    .btn-edit { background: #2563eb; color: #fff; padding: 6px 12px; font-size: 12px; }
+    .btn-edit:hover { background: #1d4ed8; }
+    .btn-del { background: #dc2626; color: #fff; padding: 6px 12px; font-size: 12px; }
+    .btn-del:hover { background: #b91c1c; }
+
+    /* Кнопки порядка разделов */
+    .btn-move {
+      background: #27272a;
+      color: #f3f4f6;
+      border: 1px solid #3f3f46;
+      padding: 6px 10px;
+      font-size: 12px;
+      line-height: 1;
+    }
+    .btn-move:hover:not(:disabled) {
+      border-color: #4ade80;
+      color: #4ade80;
+    }
+    .btn-move:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* Блок сохранения порядка и новых разделов */
+    .order-save-wrap {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed #333;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .unsaved-badge {
+      font-size: 12px;
+      color: #f59e0b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+    }
+    
+    .status-msg { margin-top: 12px; padding: 10px; border-radius: 6px; font-size: 13px; display: none; text-align: center; }
+    .status-msg.success { display: block; background: rgba(74, 222, 128, 0.15); border: 1px solid #4ade80; color: #4ade80; }
+    .status-msg.error { display: block; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #ef4444; }
+    .status-msg.loading { display: block; background: rgba(59, 130, 246, 0.15); border: 1px solid #3b82f6; color: #60a5fa; }
+    
+    /* Интерактивная галерея с Drag & Drop */
+    .images-sort-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+      min-height: 80px;
+      padding: 8px;
+      background: #141414;
+      border: 1px dashed #3f3f46;
+      border-radius: 8px;
+    }
+    .img-preview-card {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      border-radius: 6px;
+      border: 2px solid #3f3f46;
+      background: #222;
+      overflow: hidden;
+      cursor: grab;
+      user-select: none;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .img-preview-card:active {
+      cursor: grabbing;
+    }
+    .img-preview-card.dragging {
+      opacity: 0.4;
+      border-color: #4ade80;
+      transform: scale(0.95);
+    }
+    .img-preview-card.drag-over {
+      border-color: #4ade80;
+      transform: scale(1.05);
+    }
+    .img-preview-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+    .img-badge-main {
+      position: absolute;
+      bottom: 2px;
+      left: 2px;
+      background: rgba(220, 38, 38, 0.9);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 4px;
+      border-radius: 4px;
+      pointer-events: none;
+    }
+    .img-remove-btn {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background: rgba(220, 38, 38, 0.9);
+      color: #fff;
+      border: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      transition: background 0.2s;
+    }
+    .img-remove-btn:hover {
+      background: #ef4444;
+    }
+
+    /* Поиск в админке */
+    .admin-search-box { margin-bottom: 14px; }
+    .admin-search-input {
+      width: 100%;
+      padding: 10px 14px;
+      background: #141414;
+      border: 1px solid #3f3f46;
+      border-radius: 6px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .admin-search-input:focus { border-color: #4ade80; }
+
+    /* ПАГИНАЦИЯ В АДМИНКЕ */
+    .pagination-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      margin: 14px 0;
+      flex-wrap: wrap;
+    }
+    .page-btn {
+      background: #27272a;
+      color: #e5e7eb;
+      border: 1px solid #3f3f46;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .page-btn:hover:not(:disabled) {
+      border-color: #4ade80;
+      color: #4ade80;
+    }
+    .page-btn.active {
+      background: #4ade80;
+      color: #000;
+      border-color: #4ade80;
+      cursor: default;
+    }
+    .page-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .page-info {
+      font-size: 12px;
+      color: #9ca3af;
+      margin: 0 4px;
+      font-weight: 600;
+    }
+
+    /* Списки категорий и товаров */
+    .list-group { display: flex; flex-direction: column; gap: 10px; }
+    .list-row {
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .item-main {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      flex-grow: 1;
+    }
+    .item-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; background: #222; flex-shrink: 0; }
+    .item-info { flex-grow: 1; min-width: 0; }
+    .item-name { 
+      font-size: 14px; 
+      font-weight: 600; 
+      color: #fff; 
+      line-height: 1.3;
+      word-break: break-word;
+    }
+    .item-meta { font-size: 12px; color: #9ca3af; margin-top: 3px; }
+    .item-actions { 
+      display: flex; 
+      gap: 6px; 
+      flex-shrink: 0; 
+      align-items: center; 
+      flex-wrap: wrap; 
+    }
+    
+    /* Адаптив для мобилок */
+    @media (max-width: 600px) {
+      .list-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px;
+      }
+      .item-main {
+        width: 100%;
+      }
+      .list-row .item-actions {
+        width: 100%;
+        justify-content: flex-end;
+        gap: 8px;
+        border-top: 1px solid #222;
+        padding-top: 8px;
+      }
+      .list-row .item-actions .btn {
+        padding: 7px 14px;
+        font-size: 12px;
+      }
+      .row {
+        flex-direction: column;
+        gap: 8px;
+      }
+    }
+
+    .nav-bottom { text-align: center; margin-top: 20px; }
+    .nav-bottom a { color: #9ca3af; text-decoration: none; font-size: 13px; }
+    .nav-bottom a:hover { color: #4ade80; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Панель управления Pogodin_3d</h1>
+
+    <div class="panel-box">
+      <div class="form-title">🔑 Доступ к GitHub Репозиторию</div>
+      <div class="form-group">
+        <label>Personal Access Token (classic, права repo):</label>
+        <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+      </div>
+      <div class="row">
+        <div class="col form-group">
+          <label>Логин GitHub (Owner):</label>
+          <input type="text" id="ghOwner" placeholder="Твой ник на GitHub">
+        </div>
+        <div class="col form-group">
+          <label>Имя репозитория (Repo):</label>
+          <input type="text" id="ghRepo" placeholder="Название репозитория">
+        </div>
+      </div>
+      <button class="btn btn-green" id="btnConnect" style="background:#2563eb;">Подключиться к каталогу</button>
+    </div>
+
+    <div class="panel-box" id="catBox" style="display:none;">
+      <div class="form-title">🗂️ Управление разделами каталога</div>
+      <div class="row" style="margin-bottom: 12px;">
+        <input type="hidden" id="editCatId">
+        <div class="col">
+          <input type="text" id="catNameInput" placeholder="Название нового раздела.">
+        </div>
+        <button class="btn btn-green" id="btnSaveCat" style="width: auto; white-space: nowrap;">Добавить в список</button>
+        <button class="btn btn-cancel" id="btnCancelCat" style="width: auto;">Отмена</button>
+      </div>
+      
+      <div class="list-group" id="categoriesList"></div>
+
+      <div class="order-save-wrap" id="orderSaveWrap" style="display:none;">
+        <div class="unsaved-badge">⚠️ Есть несохраненные изменения в разделах! Нажмите кнопку ниже для отправки в репозиторий.</div>
+        <button class="btn btn-green" id="btnSaveCategoriesOrder" style="background: #059669;">💾 Сохранить все изменения разделов на GitHub (1 коммит)</button>
+      </div>
+    </div>
+
+    <div class="panel-box" id="editorBox" style="display:none;">
+      <div class="form-title" id="formHeader">➕ Добавить новый товар</div>
+      
+      <form id="productForm">
+        <input type="hidden" id="editItemId">
+
+        <div class="row">
+          <div class="col form-group">
+            <label>Категория товара:</label>
+            <select id="prodCategory" required>
+              </select>
+          </div>
+          <div class="col form-group">
+            <label>Цена:</label>
+            <input type="text" id="prodPrice" placeholder="например: 1500" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Название товара:</label>
+          <input type="text" id="prodTitle" placeholder="например: Шестеренка" required>
+        </div>
+
+        <div class="form-group">
+          <label>Описание и свойства:</label>
+          <textarea id="prodDesc" placeholder="Материал: PETG&#10;Особенности: Высокая прочность&#10;Цвет: Черный" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Фотографии товара (до 6 штук):</label>
+          <div class="images-sort-container" id="imagesContainer">
+            <div id="noImagesNotice" style="color:#71717a; font-size:13px; margin:auto;">Фотографии не выбраны</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Выбрать фото с устройства (автосжатие):</label>
+          <input type="file" id="prodFiles" accept="image/*" multiple>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+          <button type="submit" class="btn btn-green" id="submitBtn">Выложить товар</button>
+          <button type="button" class="btn btn-cancel" id="cancelEditBtn">Отмена</button>
+        </div>
+      </form>
+
+      <div id="statusMsg" class="status-msg"></div>
+    </div>
+
+    <div class="panel-box" id="listBox" style="display:none;">
+      <div class="form-title">📦 Товары в каталоге (<span id="itemsCount">0</span>)</div>
+      
+      <div class="admin-search-box">
+        <input type="text" id="adminSearchInput" class="admin-search-input" placeholder="🔍 Поиск товара по названию.">
+      </div>
+
+      <div class="pagination-bar" id="adminPaginationTop" style="display:none;"></div>
+
+      <div class="list-group" id="productsList"></div>
+
+      <div class="pagination-bar" id="adminPaginationBottom" style="display:none;"></div>
+    </div>
+
+    <div class="nav-bottom">
+      <a href="index.html">← Перейти в каталог</a>
+    </div>
+  </div>
+
+  <script>
+    const tokenInput = document.getElementById('ghToken');
+    const ownerInput = document.getElementById('ghOwner');
+    const repoInput = document.getElementById('ghRepo');
+    const btnConnect = document.getElementById('btnConnect');
+    
+    const catBox = document.getElementById('catBox');
+    const editorBox = document.getElementById('editorBox');
+    const listBox = document.getElementById('listBox');
+    const categoriesList = document.getElementById('categoriesList');
+    const catNameInput = document.getElementById('catNameInput');
+    const editCatId = document.getElementById('editCatId');
+    const btnSaveCat = document.getElementById('btnSaveCat');
+    const btnCancelCat = document.getElementById('btnCancelCat');
+    const orderSaveWrap = document.getElementById('orderSaveWrap');
+    const btnSaveCategoriesOrder = document.getElementById('btnSaveCategoriesOrder');
+
+    const formHeader = document.getElementById('formHeader');
+    const productForm = document.getElementById('productForm');
+    const editItemId = document.getElementById('editItemId');
+    const prodCategory = document.getElementById('prodCategory');
+    const submitBtn = document.getElementById('submitBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const statusMsg = document.getElementById('statusMsg');
+    
+    const prodFiles = document.getElementById('prodFiles');
+    const imagesContainer = document.getElementById('imagesContainer');
+    const noImagesNotice = document.getElementById('noImagesNotice');
+    const adminSearchInput = document.getElementById('adminSearchInput');
+    const productsList = document.getElementById('productsList');
+    const itemsCount = document.getElementById('itemsCount');
+    const adminPaginationTop = document.getElementById('adminPaginationTop');
+    const adminPaginationBottom = document.getElementById('adminPaginationBottom');
+
+    const ADMIN_ITEMS_PER_PAGE = 10;
+    let currentAdminPage = 1;
+
+    let allProducts = [];
+    let allCategories = [];
+    let productsSha = null;
+    let categoriesSha = null;
+    let hasUnsavedCategoryChanges = false;
+
+    let formImages = [];
+    let imagesToDeleteFromGithub = [];
+
+    tokenInput.value = localStorage.getItem('gh_token') || '';
+    ownerInput.value = localStorage.getItem('gh_owner') || '';
+    repoInput.value = localStorage.getItem('gh_repo') || '';
+
+    if (tokenInput.value && ownerInput.value && repoInput.value) {
+      loadAllData();
+    }
+
+    btnConnect.addEventListener('click', () => {
+      localStorage.setItem('gh_token', tokenInput.value.trim());
+      localStorage.setItem('gh_owner', ownerInput.value.trim());
+      localStorage.setItem('gh_repo', repoInput.value.trim());
+      loadAllData();
+    });
+
+    // Функция авто-ресайза и сжатия (до 1400px, 82% качество)
+    function compressImageFile(file, maxWidth = 1400, quality = 0.82) {
+      return new Promise((resolve) => {
+        if (!file.type.match(/image.*/) || file.type === 'image/gif' || file.type === 'image/svg+xml') {
+          const reader = new FileReader();
+          reader.onload = () => resolve({ base64: reader.result.split(',')[1], ext: file.name.split('.').pop() || 'jpg' });
+          reader.readAsDataURL(file);
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, width, height);
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const dataUrl = canvas.toDataURL('image/jpeg', quality);
+            const base64 = dataUrl.split(',')[1];
+            resolve({ base64: base64, ext: 'jpg' });
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function slugify(text) {
+      const ru = {"а":"a","б":"b","в":"v","г":"g","д":"d","е":"e","ё":"yo","ж":"zh","з":"z","и":"i","й":"y","к":"k","л":"l","м":"m","н":"n","о":"o","п":"p","р":"r","с":"s","т":"t","у":"u","ф":"f","х":"kh","ц":"ts","ч":"ch","ш":"sh","щ":"shch","ъ":"","ы":"y","ь":"","э":"e","ю":"yu","я":"ya"," ":"_"};
+      return text.toLowerCase().split('').map(char => ru[char] || char).join('').replace(/[^a-z0-9_]/g, '');
+    }
+
+    let adminSearchDebounceTimer = null;
+    adminSearchInput.addEventListener('input', () => {
+      clearTimeout(adminSearchDebounceTimer);
+      adminSearchInput.style.borderColor = '#f59e0b'; // желтая рамка во время ввода
+
+      adminSearchDebounceTimer = setTimeout(() => {
+        currentAdminPage = 1;
+        renderProductsList();
+        adminSearchInput.style.borderColor = ''; // возвращаем обычный цвет
+      }, 450);
+    });
+
+    // Обработка выбора новых файлов
+    prodFiles.addEventListener('change', () => {
+      const files = Array.from(prodFiles.files);
+      files.forEach(file => {
+        const url = URL.createObjectURL(file);
+        formImages.push({
+          id: 'img_' + Math.random().toString(36).substr(2, 9),
+          type: 'new',
+          src: url,
+          file: file
+        });
+      });
+      prodFiles.value = '';
+      renderImagesSortList();
+    });
+
+    function renderImagesSortList() {
+      imagesContainer.innerHTML = '';
+      if (formImages.length === 0) {
+        imagesContainer.appendChild(noImagesNotice);
+        return;
+      }
+
+      formImages.forEach((imgObj, index) => {
+        const card = document.createElement('div');
+        card.className = 'img-preview-card';
+        card.draggable = true;
+        card.dataset.index = index;
+
+        card.innerHTML = `
+          <img src="${imgObj.src}">
+          ${index === 0 ? '<span class="img-badge-main">Главная</span>' : ''}
+          <button type="button" class="img-remove-btn" onclick="removeImageFromForm(${index})" title="Удалить">&times;</button>
+        `;
+
+        card.addEventListener('dragstart', handleDragStart);
+        card.addEventListener('dragover', handleDragOver);
+        card.addEventListener('dragleave', handleDragLeave);
+        card.addEventListener('drop', handleDrop);
+        card.addEventListener('dragend', handleDragEnd);
+
+        imagesContainer.appendChild(card);
+      });
+    }
+
+    let draggedItemIndex = null;
+
+    function handleDragStart(e) {
+      draggedItemIndex = parseInt(this.dataset.index);
+      this.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      this.classList.add('drag-over');
+    }
+
+    function handleDragLeave() {
+      this.classList.remove('drag-over');
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      this.classList.remove('drag-over');
+      const targetIndex = parseInt(this.dataset.index);
+      if (draggedItemIndex === null || draggedItemIndex === targetIndex) return;
+
+      const [movedItem] = formImages.splice(draggedItemIndex, 1);
+      formImages.splice(targetIndex, 0, movedItem);
+      renderImagesSortList();
+    }
+
+    function handleDragEnd() {
+      this.classList.remove('dragging');
+      document.querySelectorAll('.img-preview-card').forEach(el => el.classList.remove('drag-over'));
+    }
+
+    window.removeImageFromForm = function(index) {
+      const removed = formImages.splice(index, 1)[0];
+      if (removed.type === 'existing' && removed.src.startsWith('images/')) {
+        imagesToDeleteFromGithub.push(removed.src);
+      }
+      renderImagesSortList();
+    };
+
+    async function deleteImageFromGithub(filePath) {
+      if (!filePath.startsWith('images/')) return;
+      const token = tokenInput.value.trim();
+      const owner = ownerInput.value.trim();
+      const repo = repoInput.value.trim();
+
+      try {
+        const getFileRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!getFileRes.ok) return;
+        const fileData = await getFileRes.json();
+
+        await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: `Удален файл изображения: ${filePath}`,
+            sha: fileData.sha
+          })
+        });
+      } catch (err) {
+        console.warn(`Не удалось удалить файл ${filePath}:`, err);
+      }
+    }
+
+    async function loadAllData() {
+      const token = tokenInput.value.trim();
+      const owner = ownerInput.value.trim();
+      const repo = repoInput.value.trim();
+
+      if (!token || !owner || !repo) return;
+      showStatus('loading', '⏳ Загрузка данных...');
+
+      try {
+        const catRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/categories.json?t=${Date.now()}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (catRes.ok) {
+          const catData = await catRes.json();
+          categoriesSha = catData.sha;
+          allCategories = JSON.parse(decodeURIComponent(escape(atob(catData.content.replace(/\s/g, '')))));
+        } else {
+          allCategories = [
+            { "id": "auto", "name": "Автотематика" },
+            { "id": "lamps", "name": "Светильники" },
+            { "id": "engineering", "name": "Инженерка" }
+          ];
+        }
+
+        const prodRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/products.json?t=${Date.now()}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (prodRes.ok) {
+          const prodData = await prodRes.json();
+          productsSha = prodData.sha;
+          allProducts = JSON.parse(decodeURIComponent(escape(atob(prodData.content.replace(/\s/g, '')))));
+        }
+
+        hasUnsavedCategoryChanges = false;
+        orderSaveWrap.style.display = 'none';
+
+        renderCategories();
+        renderProductsList();
+
+        catBox.style.display = 'block';
+        editorBox.style.display = 'block';
+        listBox.style.display = 'block';
+        hideStatus();
+      } catch (err) {
+        showStatus('error', `❌ Ошибка: ${err.message}`);
+      }
+    }
+
+    function markCategoriesChanged() {
+      hasUnsavedCategoryChanges = true;
+      orderSaveWrap.style.display = 'flex';
+    }
+
+    // Отрисовка категорий
+    function renderCategories() {
+      categoriesList.innerHTML = '';
+      prodCategory.innerHTML = '';
+
+      allCategories.forEach((cat, index) => {
+        const opt = document.createElement('option');
+        opt.value = cat.id;
+        opt.textContent = cat.name;
+        prodCategory.appendChild(opt);
+
+        const isFirst = index === 0;
+        const isLast = index === allCategories.length - 1;
+
+        const row = document.createElement('div');
+        row.className = 'list-row cat-row';
+        row.innerHTML = `
+          <div style="min-width:0; word-break:break-word; flex-grow:1;">
+            <strong style="color:#fff;">${cat.name}</strong> 
+            <span style="color:#71717a; font-size:12px; margin-left:6px;">(id: ${cat.id})</span>
+          </div>
+          <div class="item-actions">
+            <button class="btn btn-move" onclick="moveCategory(${index}, -1)" ${isFirst ? 'disabled' : ''} title="Переместить выше">▲</button>
+            <button class="btn btn-move" onclick="moveCategory(${index}, 1)" ${isLast ? 'disabled' : ''} title="Переместить ниже">▼</button>
+            <button class="btn btn-edit" onclick="startEditCat('${cat.id}', '${cat.name}')">Изменить</button>
+            <button class="btn btn-del" onclick="deleteCat('${cat.id}')">Удалить</button>
+          </div>
+        `;
+        categoriesList.appendChild(row);
+      });
+    }
+
+    window.moveCategory = function(index, direction) {
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= allCategories.length) return;
+
+      const [movedCat] = allCategories.splice(index, 1);
+      allCategories.splice(newIndex, 0, movedCat);
+      
+      markCategoriesChanged();
+      renderCategories();
+    };
+
+    btnSaveCat.addEventListener('click', () => {
+      const name = catNameInput.value.trim();
+      if (!name) return alert('Введите название раздела!');
+
+      const editId = editCatId.value;
+      if (editId) {
+        const cat = allCategories.find(c => c.id === editId);
+        if (cat) cat.name = name;
+      } else {
+        const newId = slugify(name) || ('cat_' + Date.now());
+        allCategories.push({ id: newId, name: name });
+      }
+
+      markCategoriesChanged();
+      resetCatForm();
+      renderCategories();
+    });
+
+    window.startEditCat = function(id, name) {
+      editCatId.value = id;
+      catNameInput.value = name;
+      btnSaveCat.textContent = 'Применить';
+      btnCancelCat.style.display = 'inline-block';
+    };
+
+    btnCancelCat.addEventListener('click', resetCatForm);
+
+    function resetCatForm() {
+      editCatId.value = '';
+      catNameInput.value = '';
+      btnSaveCat.textContent = 'Добавить в список';
+      btnCancelCat.style.display = 'none';
+    }
+
+    window.deleteCat = function(id) {
+      const cat = allCategories.find(c => c.id === id);
+      if (!confirm(`Убрать раздел "${cat.name}" из списка? (Изменения применятся на GitHub только после нажатия кнопки "Сохранить")`)) return;
+
+      allCategories = allCategories.filter(c => c.id !== id);
+      markCategoriesChanged();
+      resetCatForm();
+      renderCategories();
+    };
+
+    btnSaveCategoriesOrder.addEventListener('click', async () => {
+      btnSaveCategoriesOrder.disabled = true;
+      showStatus('loading', '⏳ Отправка обновленных разделов на GitHub...');
+      try {
+        await saveCategoriesToGithub('Обновлены разделы каталога');
+        hasUnsavedCategoryChanges = false;
+        orderSaveWrap.style.display = 'none';
+        showStatus('success', '✅ Все изменения разделов успешно сохранены в репозиторий одним коммитом!');
+      } catch (err) {
+        showStatus('error', `❌ Ошибка сохранения разделов: ${err.message}`);
+      } finally {
+        btnSaveCategoriesOrder.disabled = false;
+      }
+    });
+
+    async function saveCategoriesToGithub(message) {
+      const token = tokenInput.value.trim();
+      const owner = ownerInput.value.trim();
+      const repo = repoInput.value.trim();
+      const content = btoa(unescape(encodeURIComponent(JSON.stringify(allCategories, null, 2))));
+
+      const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/categories.json`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: message, content: content, sha: categoriesSha })
+      });
+
+      if (!res.ok) throw new Error(`Ошибка сохранения категорий: ${res.statusText}`);
+      const data = await res.json();
+      categoriesSha = data.content.sha;
+    }
+
+    // Пагинация в админке
+    function renderAdminPagination(totalItems) {
+      const totalPages = Math.ceil(totalItems / ADMIN_ITEMS_PER_PAGE);
+
+      if (totalPages <= 1) {
+        adminPaginationTop.style.display = 'none';
+        adminPaginationBottom.style.display = 'none';
+        adminPaginationTop.innerHTML = '';
+        adminPaginationBottom.innerHTML = '';
+        return;
+      }
+
+      if (currentAdminPage > totalPages) currentAdminPage = totalPages;
+      if (currentAdminPage < 1) currentAdminPage = 1;
+
+      let html = '';
+      html += `<button class="page-btn" ${currentAdminPage === 1 ? 'disabled' : ''} onclick="goToAdminPage(${currentAdminPage - 1})">← Назад</button>`;
+
+      for (let i = 1; i <= totalPages; i++) {
+        if (totalPages > 7) {
+          if (i !== 1 && i !== totalPages && Math.abs(i - currentAdminPage) > 1) {
+            if (i === 2 || i === totalPages - 1) {
+              html += `<span class="page-info">...</span>`;
+            }
+            continue;
+          }
+        }
+        html += `<button class="page-btn ${i === currentAdminPage ? 'active' : ''}" onclick="goToAdminPage(${i})">${i}</button>`;
+      }
+
+      html += `<button class="page-btn" ${currentAdminPage === totalPages ? 'disabled' : ''} onclick="goToAdminPage(${currentAdminPage + 1})">Вперед →</button>`;
+      html += `<span class="page-info">Стр. ${currentAdminPage} из ${totalPages}</span>`;
+
+      adminPaginationTop.innerHTML = html;
+      adminPaginationBottom.innerHTML = html;
+      adminPaginationTop.style.display = 'flex';
+      adminPaginationBottom.style.display = 'flex';
+    }
+
+    window.goToAdminPage = function(page) {
+      currentAdminPage = page;
+      renderProductsList();
+      window.scrollTo({ top: listBox.offsetTop - 20, behavior: 'smooth' });
+    };
+
+    // Отрисовка товаров с пагинацией
+    function renderProductsList() {
+      const query = adminSearchInput.value.trim().toLowerCase();
+      
+      const filtered = query 
+        ? allProducts.filter(p => p.title.toLowerCase().includes(query))
+        : allProducts;
+
+      itemsCount.textContent = query 
+        ? `${filtered.length} из ${allProducts.length}` 
+        : allProducts.length;
+
+      renderAdminPagination(filtered.length);
+      productsList.innerHTML = '';
+
+      if (filtered.length === 0) {
+        productsList.innerHTML = '<div style="color:#71717a; text-align:center; padding:12px;">Ничего не найдено</div>';
+        return;
+      }
+
+      const startIndex = (currentAdminPage - 1) * ADMIN_ITEMS_PER_PAGE;
+      const pageItems = filtered.slice(startIndex, startIndex + ADMIN_ITEMS_PER_PAGE);
+
+      pageItems.forEach(item => {
+        const catObj = allCategories.find(c => c.id === item.category);
+        const catLabel = catObj ? catObj.name : item.category;
+        const img = item.images && item.images.length > 0 ? item.images[0] : '';
+
+        const row = document.createElement('div');
+        row.className = 'list-row';
+        row.innerHTML = `
+          <div class="item-main">
+            <img src="${img}" class="item-thumb" onerror="this.src='https://via.placeholder.com/50'">
+            <div class="item-info">
+              <div class="item-name">${item.title}</div>
+              <div class="item-meta">${item.price} • ${catLabel}</div>
+            </div>
+          </div>
+          <div class="item-actions">
+            <button class="btn btn-edit" onclick="startEdit(${item.id})">Редактировать</button>
+            <button class="btn btn-del" onclick="deleteItem(${item.id})">Удалить</button>
+          </div>
+        `;
+        productsList.appendChild(row);
+      });
+    }
+
+    window.startEdit = function(id) {
+      const item = allProducts.find(p => p.id === id);
+      if (!item) return;
+
+      editItemId.value = item.id;
+      prodCategory.value = item.category;
+      document.getElementById('prodPrice').value = item.price;
+      document.getElementById('prodTitle').value = item.title;
+      document.getElementById('prodDesc').value = item.desc;
+
+      formImages = (item.images || []).map((src, idx) => ({
+        id: 'exist_' + idx + '_' + Date.now(),
+        type: 'existing',
+        src: src
+      }));
+      imagesToDeleteFromGithub = [];
+
+      renderImagesSortList();
+
+      formHeader.textContent = `✏️ Редактирование: ${item.title}`;
+      submitBtn.textContent = 'Сохранить изменения';
+      cancelEditBtn.style.display = 'inline-block';
+      window.scrollTo({ top: editorBox.offsetTop - 20, behavior: 'smooth' });
+    };
+
+    cancelEditBtn.addEventListener('click', resetForm);
+
+    function resetForm() {
+      editItemId.value = '';
+      productForm.reset();
+      formImages = [];
+      imagesToDeleteFromGithub = [];
+      renderImagesSortList();
+      formHeader.textContent = '➕ Добавить новый товар';
+      submitBtn.textContent = 'Опубликовать товар';
+      cancelEditBtn.style.display = 'none';
+    }
+
+    // Сохранение товара с автоматической оптимизацией фото
+    productForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const token = tokenInput.value.trim();
+      const owner = ownerInput.value.trim();
+      const repo = repoInput.value.trim();
+
+      submitBtn.disabled = true;
+      showStatus('loading', '⏳ Обработка и сжатие фотографий...');
+
+      try {
+        if (imagesToDeleteFromGithub.length > 0) {
+          showStatus('loading', '⏳ Удаление старых фото с GitHub...');
+          for (const imgPath of imagesToDeleteFromGithub) {
+            await deleteImageFromGithub(imgPath);
+          }
+        }
+
+        let finalImages = [];
+        const timestamp = Date.now();
+
+        for (let i = 0; i < formImages.length; i++) {
+          const item = formImages[i];
+          if (item.type === 'existing') {
+            finalImages.push(item.src);
+          } else if (item.type === 'new' && item.file) {
+            showStatus('loading', `⏳ Оптимизация и загрузка фото ${i + 1} из ${formImages.length}...`);
+            
+            // Автоматическое сжатие перед загрузкой
+            const { base64, ext } = await compressImageFile(item.file, 1400, 0.82);
+            const filePath = `images/prod_${timestamp}_${i + 1}.${ext}`;
+
+            const imgRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
+              method: 'PUT',
+              headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ message: `Upload optimized image ${filePath}`, content: base64 })
+            });
+
+            if (!imgRes.ok) throw new Error(`Ошибка загрузки фото: ${imgRes.statusText}`);
+            finalImages.push(filePath);
+          }
+        }
+
+        finalImages = finalImages.slice(0, 6);
+        if (finalImages.length === 0) finalImages = ['https://via.placeholder.com/300'];
+
+        const isEdit = Boolean(editItemId.value);
+        const idToUpdate = isEdit ? parseInt(editItemId.value) : Date.now();
+
+        const updatedItem = {
+          id: idToUpdate,
+          category: prodCategory.value,
+          title: document.getElementById('prodTitle').value.trim(),
+          desc: document.getElementById('prodDesc').value.trim(),
+          price: document.getElementById('prodPrice').value.trim(),
+          images: finalImages
+        };
+
+        if (isEdit) {
+          const index = allProducts.findIndex(p => p.id === idToUpdate);
+          if (index !== -1) allProducts[index] = updatedItem;
+        } else {
+          allProducts.unshift(updatedItem);
+        }
+
+        await saveProductsToGithub(`Обновлен товар: ${updatedItem.title}`);
+        showStatus('success', '✅ Товар сохранен (фото оптимизированы)!');
+        resetForm();
+        renderProductsList();
+      } catch (err) {
+        showStatus('error', `❌ Ошибка: ${err.message}`);
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    window.deleteItem = async function(id) {
+      const item = allProducts.find(p => p.id === id);
+      if (!confirm(`Точно удалить товар "${item.title}" и все его фото из папки images/?`)) return;
+
+      showStatus('loading', '⏳ Удаление фото и товара с GitHub...');
+      try {
+        if (item.images && item.images.length > 0) {
+          for (const imgPath of item.images) {
+            await deleteImageFromGithub(imgPath);
+          }
+        }
+
+        allProducts = allProducts.filter(p => p.id !== id);
+        await saveProductsToGithub(`Удален товар: ${item.title}`);
+        showStatus('success', `🗑️ Товар "${item.title}" и его фото удалены.`);
+        renderProductsList();
+        if (editItemId.value == id) resetForm();
+      } catch (err) {
+        showStatus('error', `❌ Ошибка удаления: ${err.message}`);
+      }
+    };
+
+    async function saveProductsToGithub(message) {
+      const token = tokenInput.value.trim();
+      const owner = ownerInput.value.trim();
+      const repo = repoInput.value.trim();
+      const content = btoa(unescape(encodeURIComponent(JSON.stringify(allProducts, null, 2))));
+
+      const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/products.json`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: message, content: content, sha: productsSha })
+      });
+
+      if (!res.ok) throw new Error(`Ошибка сохранения товаров: ${res.statusText}`);
+      const data = await res.json();
+      productsSha = data.content.sha;
+    }
+
+    function showStatus(type, msg) {
+      statusMsg.className = `status-msg ${type}`;
+      statusMsg.textContent = msg;
+    }
+
+    function hideStatus() {
+      statusMsg.className = 'status-msg';
+      statusMsg.style.display = 'none';
+    }
+  </script>
+</body>
+</html>

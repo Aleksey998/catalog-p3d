@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "adm-catalog-p3d.vercel.app"
+        }
+      ],
+      "destination": "/admin.html",
+      "permanent": false
+    }
+  ]
+}

@@ -12,6 +12,10 @@
     "name": "Для кухни"
   },
   {
+    "id": "remkomplekty_dlya_domashney_tekhniki",
+    "name": "Ремкомплекты для домашней техники"
+  },
+  {
     "id": "prochee",
     "name": "Прочее"
   }

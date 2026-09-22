@@ -1,5 +1,15 @@
 [
   {
+    "id": 1790100315514,
+    "category": "prochee",
+    "title": "Для теста",
+    "desc": "Для теста",
+    "price": "1",
+    "images": [
+      "https://via.placeholder.com/300"
+    ]
+  },
+  {
     "id": 1789155370609,
     "category": "prochee",
     "title": "Услуги моделирования и 3D печати",

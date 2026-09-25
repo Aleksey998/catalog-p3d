@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Админка — Pogodin_3d</title>
+  <script src="mysettings.js"></script>
   <link rel="icon" type="image/png" href="logo.png">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
@@ -20,10 +21,117 @@
       margin-bottom: 24px;
     }
     
-    .form-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; color: #fff; border-bottom: 1px solid #333; padding-bottom: 8px; }
+    .form-title { 
+      font-size: 16px; 
+      font-weight: 700; 
+      margin-bottom: 14px; 
+      color: #fff; 
+      border-bottom: 1px solid #333; 
+      padding-bottom: 8px; 
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .form-title-clickable {
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.2s;
+    }
+    .form-title-clickable:hover {
+      color: #4ade80;
+    }
     
+    .btn-toggle-arrow {
+      background: #27272a;
+      border: 1px solid #3f3f46;
+      color: #9ca3af;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .btn-toggle-arrow:hover { 
+      color: #fff; 
+      border-color: #4ade80; 
+      background: #333;
+    }
+
     .form-group { margin-bottom: 14px; }
     label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: #9ca3af; }
+    
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+    .input-wrapper input {
+      padding-right: 42px !important;
+    }
+    .input-status-icon {
+      position: absolute;
+      right: 12px;
+      width: 22px;
+      height: 22px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      border-radius: 50%;
+      user-select: none;
+      pointer-events: auto;
+      cursor: help;
+    }
+    .input-status-icon.valid {
+      display: flex;
+      background: rgba(74, 222, 128, 0.15);
+      border: 1px solid #4ade80;
+      color: #4ade80;
+    }
+    .input-status-icon.invalid {
+      display: flex;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid #ef4444;
+      color: #ef4444;
+    }
+    .input-status-icon.checking {
+      display: flex;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid #3b82f6;
+      color: #60a5fa;
+      font-size: 11px;
+    }
+
+    /* Справочные информационные плашки под полями ввода */
+    .field-hint-box {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      line-height: 1.3;
+    }
+    .hint-badge {
+      color: #4ade80;
+      font-weight: 700;
+      background: rgba(74, 222, 128, 0.12);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
     input[type="text"], input[type="password"], textarea, select {
       width: 100%; padding: 10px 12px; background: #141414; border: 1px solid #3f3f46;
       border-radius: 6px; color: #fff; font-size: 14px; outline: none;
@@ -38,7 +146,7 @@
       padding: 10px 16px; border: none; border-radius: 6px; font-weight: 700;
       font-size: 13px; cursor: pointer; transition: all 0.2s;
     }
-    .btn-green { background: #16a34a; color: #fff; width: 100%; }
+    .btn-green { background: #16a34a; color: #fff; }
     .btn-green:hover { background: #15803d; }
     .btn-cancel { background: #3f3f46; color: #fff; display: none; }
     .btn-cancel:hover { background: #52525b; }
@@ -46,6 +154,12 @@
     .btn-edit:hover { background: #1d4ed8; }
     .btn-del { background: #dc2626; color: #fff; padding: 6px 12px; font-size: 12px; }
     .btn-del:hover { background: #b91c1c; }
+
+    /* Кнопка отправки формы товара (ПК: компактная) */
+    .btn-submit-product {
+      width: auto;
+      min-width: 180px;
+    }
 
     /* Кнопки порядка разделов */
     .btn-move {
@@ -85,6 +199,7 @@
     
     .status-msg { margin-top: 12px; padding: 10px; border-radius: 6px; font-size: 13px; display: none; text-align: center; }
     .status-msg.success { display: block; background: rgba(74, 222, 128, 0.15); border: 1px solid #4ade80; color: #4ade80; }
+    .status-msg.warning { display: block; background: rgba(234, 179, 8, 0.15); border: 1px solid #eab308; color: #facc15; }
     .status-msg.error { display: block; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #ef4444; }
     .status-msg.loading { display: block; background: rgba(59, 130, 246, 0.15); border: 1px solid #3b82f6; color: #60a5fa; }
     
@@ -258,6 +373,68 @@
       align-items: center; 
       flex-wrap: wrap; 
     }
+
+    /* Строка действий формы */
+    .submit-actions-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .submit-btn-wrap {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    /* Увеличенный чекбокс и 2-строчный текст */
+    .tg-publish-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .tg-publish-label input[type="checkbox"] {
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      accent-color: #2563eb;
+      flex-shrink: 0;
+    }
+    .tg-publish-texts {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .tg-publish-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #f3f4f6;
+      line-height: 1.2;
+    }
+    .tg-publish-target {
+      font-size: 12px;
+      color: #9ca3af;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      line-height: 1.2;
+    }
+    .tg-target-badge {
+      color: #4ade80;
+      font-weight: 700;
+      background: rgba(74, 222, 128, 0.12);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+    .tg-target-warn {
+      color: #f59e0b;
+      font-size: 11px;
+    }
     
     /* Адаптив для мобилок */
     @media (max-width: 600px) {
@@ -285,6 +462,23 @@
         flex-direction: column;
         gap: 8px;
       }
+      .submit-actions-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+      }
+      .submit-btn-wrap {
+        width: 100%;
+        flex-direction: column;
+      }
+      .btn-submit-product, .btn-cancel {
+        width: 100%;
+      }
+      .tg-publish-label {
+        width: 100%;
+        padding-top: 6px;
+        border-top: 1px dashed #2a2a2a;
+      }
     }
 
     .nav-bottom { text-align: center; margin-top: 20px; }
@@ -298,57 +492,98 @@
     <h1>Панель управления Pogodin_3d</h1>
 
     <div class="panel-box">
-      <div class="form-title">🔑 Доступ к GitHub Репозиторию</div>
-      <div class="form-group">
-        <label>Personal Access Token (classic, права repo):</label>
-        <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+      <div class="form-title form-title-clickable" id="authHeaderClickable" title="Нажмите, чтобы свернуть или развернуть">
+        <span>🔑 Окно авторизации</span>
+        <button type="button" class="btn-toggle-arrow" id="btnToggleAuth">▲</button>
       </div>
-      <div class="row">
-        <div class="col form-group">
-          <label>Логин GitHub (Owner):</label>
-          <input type="text" id="ghOwner" placeholder="Твой ник на GitHub">
+
+      <div id="authContent">
+        <!-- БЛОК GITHUB -->
+        <div class="form-group">
+          <label>Personal Access Token GitHub (classic, права repo):</label>
+          <div class="input-wrapper">
+            <input type="text" id="ghToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+            <span class="input-status-icon" id="status_ghToken" title=""></span>
+          </div>
+          <div class="field-hint-box" id="ghHintBox">
+            <span>Репозиторий проекта:</span>
+            <span class="hint-badge" id="hintGhOwner">...</span>
+            <span>/</span>
+            <span class="hint-badge" id="hintGhRepo">...</span>
+          </div>
         </div>
-        <div class="col form-group">
-          <label>Имя репозитория (Repo):</label>
-          <input type="text" id="ghRepo" placeholder="Название репозитория">
+
+        <!-- БЛОК TELEGRAM -->
+        <div class="form-group" style="margin-top: 14px; padding-top: 14px; border-top: 1px dashed #2a2a2a;">
+          <label>Токен Telegram-бота (из BotFather):</label>
+          <div class="input-wrapper">
+            <input type="text" id="tgToken" placeholder="123ххххххххххххххххххххххххх">
+            <span class="input-status-icon" id="status_tgToken" title=""></span>
+          </div>
+          <div class="field-hint-box" id="tgHintBox">
+            <span>Бот:</span>
+            <span class="hint-badge" id="hintTgBot">...</span>
+            <span style="margin-left: 6px;">➔ Канал:</span>
+            <span class="hint-badge" id="hintTgChannel">...</span>
+          </div>
+        </div>
+
+        <button class="btn btn-green" id="btnConnect" style="background:#2563eb; width:100%; margin-top: 8px;">Проверка и сохранение</button>
+      </div>
+    </div>
+
+    <div class="panel-box" id="tgBotMessageBox" style="display:none;">
+      <div class="form-title form-title-clickable" id="tgBotHeaderClickable" title="Нажмите, чтобы свернуть или развернуть">
+        <span>🤖 Сообщение от TG бота</span>
+        <button type="button" class="btn-toggle-arrow" id="btnToggleTgBot">▲</button>
+      </div>
+
+      <div id="tgBotContent">
+        <div id="tgBotMessageContainer">
+          <div style="color:#71717a; font-size:13px; text-align:center; padding: 12px;">Загрузка содержимого tgbotmessage.html...</div>
         </div>
       </div>
-      <button class="btn btn-green" id="btnConnect" style="background:#2563eb;">Подключиться к каталогу</button>
     </div>
 
     <div class="panel-box" id="catBox" style="display:none;">
-      <div class="form-title">🗂️ Управление разделами каталога</div>
-      <div class="row" style="margin-bottom: 12px;">
-        <input type="hidden" id="editCatId">
-        <div class="col">
-          <input type="text" id="catNameInput" placeholder="Название нового раздела.">
-        </div>
-        <button class="btn btn-green" id="btnSaveCat" style="width: auto; white-space: nowrap;">Добавить в список</button>
-        <button class="btn btn-cancel" id="btnCancelCat" style="width: auto;">Отмена</button>
+      <div class="form-title form-title-clickable" id="catHeaderClickable" title="Нажмите, чтобы свернуть или развернуть">
+        <span>🗂️ Управление разделами каталога</span>
+        <button type="button" class="btn-toggle-arrow" id="btnToggleCat">▲</button>
       </div>
       
-      <div class="list-group" id="categoriesList"></div>
+      <div id="catContent">
+        <div class="row" style="margin-bottom: 12px;">
+          <input type="hidden" id="editCatId">
+          <div class="col">
+            <input type="text" id="catNameInput" placeholder="Введите название нового раздела.">
+          </div>
+          <button class="btn btn-green" id="btnSaveCat" style="width: auto; white-space: nowrap;">Добавить в список</button>
+          <button class="btn btn-cancel" id="btnCancelCat" style="width: auto;">Отмена</button>
+        </div>
+        
+        <div class="list-group" id="categoriesList"></div>
 
-      <div class="order-save-wrap" id="orderSaveWrap" style="display:none;">
-        <div class="unsaved-badge">⚠️ Есть несохраненные изменения в разделах! Нажмите кнопку ниже для отправки в репозиторий.</div>
-        <button class="btn btn-green" id="btnSaveCategoriesOrder" style="background: #059669;">💾 Сохранить все изменения разделов на GitHub (1 коммит)</button>
+        <div class="order-save-wrap" id="orderSaveWrap" style="display:none;">
+          <div class="unsaved-badge">⚠️ Есть несохраненные изменения в разделах! Нажмите кнопку ниже для отправки в репозиторий.</div>
+          <button class="btn btn-green" id="btnSaveCategoriesOrder" style="background: #059669;">💾 Сохранить все изменения разделов на GitHub</button>
+        </div>
       </div>
     </div>
 
     <div class="panel-box" id="editorBox" style="display:none;">
-      <div class="form-title" id="formHeader">➕ Добавить новый товар</div>
+      <div class="form-title" id="formHeader"><span>➕ Добавить новый товар</span></div>
       
       <form id="productForm">
         <input type="hidden" id="editItemId">
 
         <div class="row">
           <div class="col form-group">
-            <label>Категория товара:</label>
+            <label>Раздел товара:</label>
             <select id="prodCategory" required>
-              </select>
+            </select>
           </div>
           <div class="col form-group">
-            <label>Цена:</label>
+            <label>Цена (указывать без ₽):</label>
             <input type="text" id="prodPrice" placeholder="например: 1500" required>
           </div>
         </div>
@@ -359,7 +594,7 @@
         </div>
 
         <div class="form-group">
-          <label>Описание и свойства:</label>
+          <label>Описание и свойства (* - ж, ** - к, _ - п):</label>
           <textarea id="prodDesc" placeholder="Материал: PETG&#10;Особенности: Высокая прочность&#10;Цвет: Черный" required></textarea>
         </div>
 
@@ -375,9 +610,21 @@
           <input type="file" id="prodFiles" accept="image/*" multiple>
         </div>
 
-        <div style="display:flex; gap:10px;">
-          <button type="submit" class="btn btn-green" id="submitBtn">Выложить товар</button>
-          <button type="button" class="btn btn-cancel" id="cancelEditBtn">Отмена</button>
+        <div class="submit-actions-row">
+          <div class="submit-btn-wrap">
+            <button type="submit" class="btn btn-green btn-submit-product" id="submitBtn">Выложить товар</button>
+            <button type="button" class="btn btn-cancel" id="cancelEditBtn">Отмена</button>
+          </div>
+          
+          <label class="tg-publish-label" id="tgCheckboxContainer">
+            <input type="checkbox" id="tgPublishCheck" checked>
+            <div class="tg-publish-texts">
+              <span class="tg-publish-title">Опубликовать в Telegram</span>
+              <span class="tg-publish-target" id="tgPublishTargetDesc">
+                <span class="tg-target-warn">Проверка бота и канала...</span>
+              </span>
+            </div>
+          </label>
         </div>
       </form>
 
@@ -385,7 +632,7 @@
     </div>
 
     <div class="panel-box" id="listBox" style="display:none;">
-      <div class="form-title">📦 Товары в каталоге (<span id="itemsCount">0</span>)</div>
+      <div class="form-title"><span>📦 Товары в каталоге (<span id="itemsCount">0</span>)</span></div>
       
       <div class="admin-search-box">
         <input type="text" id="adminSearchInput" class="admin-search-input" placeholder="🔍 Поиск товара по названию.">
@@ -405,13 +652,32 @@
 
   <script>
     const tokenInput = document.getElementById('ghToken');
-    const ownerInput = document.getElementById('ghOwner');
-    const repoInput = document.getElementById('ghRepo');
+    const tgTokenInput = document.getElementById('tgToken');
     const btnConnect = document.getElementById('btnConnect');
-    
+
+    // Справочные элементы в окне авторизации
+    const hintGhOwner = document.getElementById('hintGhOwner');
+    const hintGhRepo = document.getElementById('hintGhRepo');
+    const hintTgBot = document.getElementById('hintTgBot');
+    const hintTgChannel = document.getElementById('hintTgChannel');
+
+    // Окно авторизации
+    const authContent = document.getElementById('authContent');
+    const authHeaderClickable = document.getElementById('authHeaderClickable');
+    const btnToggleAuth = document.getElementById('btnToggleAuth');
+
+    // Сообщение от TG бота
+    const tgBotMessageBox = document.getElementById('tgBotMessageBox');
+    const tgBotContent = document.getElementById('tgBotContent');
+    const tgBotHeaderClickable = document.getElementById('tgBotHeaderClickable');
+    const btnToggleTgBot = document.getElementById('btnToggleTgBot');
+    const tgBotMessageContainer = document.getElementById('tgBotMessageContainer');
+
+    // Управление разделами
     const catBox = document.getElementById('catBox');
-    const editorBox = document.getElementById('editorBox');
-    const listBox = document.getElementById('listBox');
+    const catContent = document.getElementById('catContent');
+    const catHeaderClickable = document.getElementById('catHeaderClickable');
+    const btnToggleCat = document.getElementById('btnToggleCat');
     const categoriesList = document.getElementById('categoriesList');
     const catNameInput = document.getElementById('catNameInput');
     const editCatId = document.getElementById('editCatId');
@@ -420,6 +686,9 @@
     const orderSaveWrap = document.getElementById('orderSaveWrap');
     const btnSaveCategoriesOrder = document.getElementById('btnSaveCategoriesOrder');
 
+    // Редактор товара
+    const editorBox = document.getElementById('editorBox');
+    const listBox = document.getElementById('listBox');
     const formHeader = document.getElementById('formHeader');
     const productForm = document.getElementById('productForm');
     const editItemId = document.getElementById('editItemId');
@@ -427,6 +696,9 @@
     const submitBtn = document.getElementById('submitBtn');
     const cancelEditBtn = document.getElementById('cancelEditBtn');
     const statusMsg = document.getElementById('statusMsg');
+
+    const tgPublishCheck = document.getElementById('tgPublishCheck');
+    const tgPublishTargetDesc = document.getElementById('tgPublishTargetDesc');
     
     const prodFiles = document.getElementById('prodFiles');
     const imagesContainer = document.getElementById('imagesContainer');
@@ -449,22 +721,361 @@
     let formImages = [];
     let imagesToDeleteFromGithub = [];
 
+    // Загрузка сохраненных токенов из памяти браузера
     tokenInput.value = localStorage.getItem('gh_token') || '';
-    ownerInput.value = localStorage.getItem('gh_owner') || '';
-    repoInput.value = localStorage.getItem('gh_repo') || '';
+    tgTokenInput.value = localStorage.getItem('tg_token') || '';
 
-    if (tokenInput.value && ownerInput.value && repoInput.value) {
-      loadAllData();
+    // Инициализация справочных данных из mysettings.js
+    function initHintsFromSettings() {
+      if (!window.MY_SETTINGS) return;
+      hintGhOwner.textContent = window.MY_SETTINGS.github_owner || '(не указан)';
+      hintGhRepo.textContent = window.MY_SETTINGS.github_repo || '(не указан)';
+      hintTgBot.textContent = window.MY_SETTINGS.bot_username ? `@${window.MY_SETTINGS.bot_username.replace('@', '')}` : '(не указан)';
+      hintTgChannel.textContent = window.MY_SETTINGS.channel_username ? `@${window.MY_SETTINGS.channel_username.replace('@', '')}` : '(не указан)';
+    }
+    initHintsFromSettings();
+
+    // 1. Управление сворачиванием: Окно авторизации
+    function setAuthCollapsed(isCollapsed) {
+      if (isCollapsed) {
+        authContent.style.display = 'none';
+        btnToggleAuth.textContent = '▼';
+        localStorage.setItem('auth_collapsed', '1');
+      } else {
+        authContent.style.display = 'block';
+        btnToggleAuth.textContent = '▲';
+        localStorage.setItem('auth_collapsed', '0');
+      }
     }
 
-    btnConnect.addEventListener('click', () => {
-      localStorage.setItem('gh_token', tokenInput.value.trim());
-      localStorage.setItem('gh_owner', ownerInput.value.trim());
-      localStorage.setItem('gh_repo', repoInput.value.trim());
-      loadAllData();
+    function toggleAuthPanel() {
+      const isCurrentlyCollapsed = authContent.style.display === 'none';
+      setAuthCollapsed(!isCurrentlyCollapsed);
+    }
+
+    authHeaderClickable.addEventListener('click', toggleAuthPanel);
+    btnToggleAuth.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleAuthPanel();
     });
 
-    // Функция авто-ресайза и сжатия (до 1400px, 82% качество)
+    if (localStorage.getItem('auth_collapsed') === '1') {
+      setAuthCollapsed(true);
+    } else {
+      setAuthCollapsed(false);
+    }
+
+    // 2. Управление сворачиванием: Сообщение от TG бота
+    function setTgBotCollapsed(isCollapsed) {
+      if (isCollapsed) {
+        tgBotContent.style.display = 'none';
+        btnToggleTgBot.textContent = '▼';
+        localStorage.setItem('tgbot_collapsed', '1');
+      } else {
+        tgBotContent.style.display = 'block';
+        btnToggleTgBot.textContent = '▲';
+        localStorage.setItem('tgbot_collapsed', '0');
+      }
+    }
+
+    function toggleTgBotPanel() {
+      const isCurrentlyCollapsed = tgBotContent.style.display === 'none';
+      setTgBotCollapsed(!isCurrentlyCollapsed);
+    }
+
+    tgBotHeaderClickable.addEventListener('click', toggleTgBotPanel);
+    btnToggleTgBot.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleTgBotPanel();
+    });
+
+    if (localStorage.getItem('tgbot_collapsed') === '1') {
+      setTgBotCollapsed(true);
+    } else {
+      setTgBotCollapsed(false);
+    }
+
+    // 3. Управление сворачиванием: Разделы каталога
+    function setCatCollapsed(isCollapsed) {
+      if (isCollapsed) {
+        catContent.style.display = 'none';
+        btnToggleCat.textContent = '▼';
+        localStorage.setItem('cat_collapsed', '1');
+      } else {
+        catContent.style.display = 'block';
+        btnToggleCat.textContent = '▲';
+        localStorage.setItem('cat_collapsed', '0');
+      }
+    }
+
+    function toggleCatPanel() {
+      const isCurrentlyCollapsed = catContent.style.display === 'none';
+      setCatCollapsed(!isCurrentlyCollapsed);
+    }
+
+    catHeaderClickable.addEventListener('click', toggleCatPanel);
+    btnToggleCat.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleCatPanel();
+    });
+
+    if (localStorage.getItem('cat_collapsed') === '1') {
+      setCatCollapsed(true);
+    } else {
+      setCatCollapsed(false);
+    }
+
+    // Загрузка файла tgbotmessage.html из репозитория с запуском скриптов
+    async function loadTgBotMessageFile() {
+      const token = tokenInput.value.trim();
+      const owner = window.MY_SETTINGS.github_owner;
+      const repo = window.MY_SETTINGS.github_repo;
+
+      if (!token || !owner || !repo) return;
+
+      try {
+        const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/tgbotmessage.html?t=${Date.now()}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const htmlContent = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
+          
+          tgBotMessageContainer.innerHTML = htmlContent;
+
+          const scripts = tgBotMessageContainer.querySelectorAll('script');
+          scripts.forEach(oldScript => {
+            const newScript = document.createElement('script');
+            Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+            newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+          });
+
+        } else if (res.status === 404) {
+          tgBotMessageContainer.innerHTML = `
+            <div style="color:#9ca3af; font-size:13px; text-align:center; padding: 14px; border: 1px dashed #3f3f46; border-radius: 8px;">
+              Файл <b>tgbotmessage.html</b> пока не найден в репозитории.<br>Создайте его в корне проекта на GitHub, и его содержимое появится здесь.
+            </div>`;
+        } else {
+          tgBotMessageContainer.innerHTML = `<div style="color:#ef4444; font-size:13px; text-align:center;">Не удалось загрузить tgbotmessage.html (HTTP ${res.status})</div>`;
+        }
+      } catch (err) {
+        console.warn('Ошибка загрузки tgbotmessage.html:', err);
+        tgBotMessageContainer.innerHTML = `<div style="color:#ef4444; font-size:13px; text-align:center;">Ошибка подключения при загрузке tgbotmessage.html</div>`;
+      }
+    }
+
+    // Установка индикатора поля ввода
+    function setFieldStatus(fieldId, state, titleText = '') {
+      const el = document.getElementById(`status_${fieldId}`);
+      if (!el) return;
+      el.className = 'input-status-icon';
+      el.title = titleText;
+      if (state === 'valid') {
+        el.classList.add('valid');
+        el.textContent = '✓';
+      } else if (state === 'invalid') {
+        el.classList.add('invalid');
+        el.textContent = '✕';
+      } else if (state === 'checking') {
+        el.classList.add('checking');
+        el.textContent = '⏳';
+      } else {
+        el.style.display = 'none';
+      }
+    }
+
+    // Проверка соответствия токена GitHub аккаунту и репозиторию из mysettings.js
+    async function verifyGithubCredentials() {
+      const ghToken = tokenInput.value.trim();
+      const expectedOwner = (window.MY_SETTINGS?.github_owner || '').trim().toLowerCase();
+      const expectedRepo = (window.MY_SETTINGS?.github_repo || '').trim();
+
+      if (!ghToken) {
+        setFieldStatus('ghToken', 'none');
+        return false;
+      }
+
+      setFieldStatus('ghToken', 'checking', 'Проверка токена и прав доступа...');
+
+      try {
+        const userRes = await fetch('https://api.github.com/user', {
+          headers: { 'Authorization': `Bearer ${ghToken}` }
+        });
+
+        if (!userRes.ok) {
+          setFieldStatus('ghToken', 'invalid', 'Неверный токен GitHub (401 Unauthorized)');
+          return false;
+        }
+
+        const userData = await userRes.json();
+        const actualLogin = (userData.login || '').toLowerCase();
+
+        if (actualLogin !== expectedOwner) {
+          setFieldStatus('ghToken', 'invalid', `Токен принадлежит пользователю @${userData.login}, а в настройках указан @${window.MY_SETTINGS?.github_owner}`);
+          return false;
+        }
+
+        // Проверяем доступ к конкретному репозиторию
+        const repoRes = await fetch(`https://api.github.com/repos/${window.MY_SETTINGS.github_owner}/${expectedRepo}`, {
+          headers: { 'Authorization': `Bearer ${ghToken}` }
+        });
+
+        if (repoRes.ok) {
+          setFieldStatus('ghToken', 'valid', `Токен подтвержден для аккаунта @${userData.login} и репозитория ${expectedRepo}`);
+          return true;
+        } else {
+          setFieldStatus('ghToken', 'invalid', `Репозиторий ${expectedRepo} не найден или нет прав на запись`);
+          return false;
+        }
+      } catch {
+        setFieldStatus('ghToken', 'invalid', 'Ошибка соединения с GitHub API');
+        return false;
+      }
+    }
+
+    // Проверка Telegram-бота: совпадение с bot_username из mysettings.js и статус онлайн
+    async function verifyTelegramCredentials() {
+      const tgToken = tgTokenInput.value.trim();
+      const expectedBot = (window.MY_SETTINGS?.bot_username || '').replace('@', '').trim().toLowerCase();
+      const channelRaw = window.MY_SETTINGS?.channel_username ? `@${window.MY_SETTINGS.channel_username.replace('@', '')}` : '';
+
+      localStorage.setItem('tg_token', tgToken);
+
+      if (!tgToken) {
+        setFieldStatus('tgToken', 'none');
+        updateTelegramTargetLabel(false, false, '');
+        return false;
+      }
+
+      setFieldStatus('tgToken', 'checking', 'Связь с ботом...');
+
+      try {
+        const meRes = await fetch(`https://api.telegram.org/bot${tgToken}/getMe`);
+        const meData = await meRes.json();
+
+        if (meData.ok && meData.result) {
+          const actualBot = (meData.result.username || '').toLowerCase();
+          const botId = meData.result.id;
+          
+          // 1. Проверяем совпадение имени бота
+          if (actualBot !== expectedBot) {
+            setFieldStatus('tgToken', 'invalid', `Токен принадлежит боту @${meData.result.username}, а в mysettings.js указан @${window.MY_SETTINGS?.bot_username}`);
+            updateTelegramTargetLabel(true, false, false, channelRaw);
+            return false;
+          }
+
+          // 2. Проверяем, добавлен ли этот бот в канал админом
+          let isBotAdmin = false;
+          try {
+            const memberRes = await fetch(`https://api.telegram.org/bot${tgToken}/getChatMember?chat_id=${channelRaw}&user_id=${botId}`);
+            const memberData = await memberRes.json();
+            if (memberData.ok && memberData.result?.status === 'administrator') {
+              isBotAdmin = true;
+            }
+          } catch (e) {
+            console.warn('Ошибка связи с каналом:', e);
+          }
+
+          // 3. Выносим вердикт
+          if (isBotAdmin) {
+            setFieldStatus('tgToken', 'valid', `Бот @${meData.result.username} на связи и является админом канала ${channelRaw}`);
+            updateTelegramTargetLabel(true, true, true, channelRaw);
+            return true;
+          } else {
+            setFieldStatus('tgToken', 'invalid', `Бот не назначен администратором в канале ${channelRaw}`);
+            updateTelegramTargetLabel(true, true, false, channelRaw);
+            return false;
+          }
+        } else {
+          setFieldStatus('tgToken', 'invalid', 'Неверный токен Telegram-бота');
+          updateTelegramTargetLabel(false, false, channelRaw);
+          return false;
+        }
+      } catch {
+        setFieldStatus('tgToken', 'invalid', 'Ошибка связи с Telegram API (нет сети)');
+        updateTelegramTargetLabel(false, false, channelRaw);
+        return false;
+      }
+    }
+
+    function updateTelegramTargetLabel(isBotValid, isMatch, isChannelLinked, channelRaw) {
+      const expectedBot = window.MY_SETTINGS?.bot_username ? `@${window.MY_SETTINGS.bot_username.replace('@', '')}` : '';
+      const tokenVal = tgTokenInput.value.trim();
+
+      // Токен вообще не введён
+      if (!tokenVal) {
+        tgPublishTargetDesc.innerHTML = `<span class="tg-target-warn">⚠️ Токен бота не заполнен в окне авторизации выше</span>`;
+        return;
+      }
+
+      // Всё успешно совпало и бот на связи
+      if (isBotValid && isMatch && isChannelLinked) {
+        tgPublishTargetDesc.innerHTML = `
+          <span class="tg-target-badge">${expectedBot}</span>
+          <span>➔</span>
+          <span class="tg-target-badge">${channelRaw}</span>
+        `;
+      // Бот не является администратором канала
+      } else if (isBotValid && isMatch && !isChannelLinked) {
+        tgPublishTargetDesc.innerHTML = `
+          <span class="tg-target-warn">⚠️ Бот ${expectedBot} не назначен админом в канале ${channelRaw}</span>
+        `;
+      // Бот ответил, но его ник не совпадает с настройками
+      } else if (isBotValid && !isMatch) {
+        tgPublishTargetDesc.innerHTML = `
+          <span class="tg-target-warn">⚠️ Бот по токену (@${data.result.username}) не совпадает с указанным (@${window.MY_SETTINGS?.bot_username})</span>
+        `;
+      // Ошибка токена или нет сети
+      } else {
+        tgPublishTargetDesc.innerHTML = `<span class="tg-target-warn">⚠️ Неверный токен Telegram-бота или нет связи</span>`;
+      }
+    }
+
+    // Автопроверка Telegram при вводе токена
+    let tgCheckDebounceTimer = null;
+    tgTokenInput.addEventListener('input', () => {
+      clearTimeout(tgCheckDebounceTimer);
+      tgCheckDebounceTimer = setTimeout(verifyTelegramCredentials, 500);
+    });
+    tgTokenInput.addEventListener('change', verifyTelegramCredentials);
+
+    // 1. АВТОПРОГРУЗКА ПРИ СТАРТЕ ИЛИ F5
+    const savedGhToken = localStorage.getItem('gh_token') || '';
+    if (tgTokenInput.value.trim()) {
+      verifyTelegramCredentials();
+    }
+
+    if (savedGhToken.trim()) {
+      verifyGithubCredentials().then(isValid => {
+        if (isValid) loadAllData();
+      });
+    }
+
+    // 2. РУЧНАЯ ПРОВЕРКА И СОХРАНЕНИЕ
+    btnConnect.addEventListener('click', async () => {
+      const ghTokenVal = tokenInput.value.trim();
+      const tgTokenVal = tgTokenInput.value.trim();
+
+      localStorage.setItem('gh_token', ghTokenVal);
+      localStorage.setItem('tg_token', tgTokenVal);
+
+      const isGhValid = await verifyGithubCredentials();
+      await verifyTelegramCredentials();
+
+      if (isGhValid) {
+        tgBotMessageBox.style.display = 'block';
+        catBox.style.display = 'block';
+        editorBox.style.display = 'block';
+        listBox.style.display = 'block';
+        loadAllData();
+      } else {
+        alert('❌ Токен GitHub не прошёл проверку! Убедитесь, что токен принадлежит аккаунту и репозиторию из mysettings.js.');
+      }
+    });
+
+    // Функция авто-ресайза и сжатия
     function compressImageFile(file, maxWidth = 1400, quality = 0.82) {
       return new Promise((resolve) => {
         if (!file.type.match(/image.*/) || file.type === 'image/gif' || file.type === 'image/svg+xml') {
@@ -513,16 +1124,15 @@
     let adminSearchDebounceTimer = null;
     adminSearchInput.addEventListener('input', () => {
       clearTimeout(adminSearchDebounceTimer);
-      adminSearchInput.style.borderColor = '#f59e0b'; // желтая рамка во время ввода
+      adminSearchInput.style.borderColor = '#f59e0b';
 
       adminSearchDebounceTimer = setTimeout(() => {
         currentAdminPage = 1;
         renderProductsList();
-        adminSearchInput.style.borderColor = ''; // возвращаем обычный цвет
+        adminSearchInput.style.borderColor = '';
       }, 450);
     });
 
-    // Обработка выбора новых файлов
     prodFiles.addEventListener('change', () => {
       const files = Array.from(prodFiles.files);
       files.forEach(file => {
@@ -552,7 +1162,7 @@
         card.dataset.index = index;
 
         card.innerHTML = `
-          <img src="${imgObj.src}">
+          <img src="${imgObj.src}" onerror="this.src='nofoto.jpg'">
           ${index === 0 ? '<span class="img-badge-main">Главная</span>' : ''}
           <button type="button" class="img-remove-btn" onclick="removeImageFromForm(${index})" title="Удалить">&times;</button>
         `;
@@ -612,8 +1222,8 @@
     async function deleteImageFromGithub(filePath) {
       if (!filePath.startsWith('images/')) return;
       const token = tokenInput.value.trim();
-      const owner = ownerInput.value.trim();
-      const repo = repoInput.value.trim();
+      const owner = window.MY_SETTINGS.github_owner;
+      const repo = window.MY_SETTINGS.github_repo;
 
       try {
         const getFileRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
@@ -637,49 +1247,70 @@
 
     async function loadAllData() {
       const token = tokenInput.value.trim();
-      const owner = ownerInput.value.trim();
-      const repo = repoInput.value.trim();
+      const owner = window.MY_SETTINGS.github_owner;
+      const repo = window.MY_SETTINGS.github_repo;
 
       if (!token || !owner || !repo) return;
+
+      tgBotMessageBox.style.display = 'block';
+      catBox.style.display = 'block';
+      editorBox.style.display = 'block';
+      listBox.style.display = 'block';
+
       showStatus('loading', '⏳ Загрузка данных...');
 
       try {
+        loadTgBotMessageFile();
+
         const catRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/categories.json?t=${Date.now()}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
+        if (catRes.status === 401 || catRes.status === 403 || catRes.status === 404) {
+          throw new Error(`Нет доступа к репозиторию или файлам (HTTP ${catRes.status})`);
+        }
         if (catRes.ok) {
           const catData = await catRes.json();
           categoriesSha = catData.sha;
           allCategories = JSON.parse(decodeURIComponent(escape(atob(catData.content.replace(/\s/g, '')))));
-        } else {
-          allCategories = [
-            { "id": "auto", "name": "Автотематика" },
-            { "id": "lamps", "name": "Светильники" },
-            { "id": "engineering", "name": "Инженерка" }
-          ];
         }
 
         const prodRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/products.json?t=${Date.now()}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
+        if (prodRes.status === 401 || prodRes.status === 403 || prodRes.status === 404) {
+          throw new Error(`Ошибка загрузки products.json (HTTP ${prodRes.status})`);
+        }
         if (prodRes.ok) {
           const prodData = await prodRes.json();
           productsSha = prodData.sha;
           allProducts = JSON.parse(decodeURIComponent(escape(atob(prodData.content.replace(/\s/g, '')))));
         }
 
+        tgBotMessageBox.style.display = 'block';
+        catBox.style.display = 'block';
+        editorBox.style.display = 'block';
+        listBox.style.display = 'block';
+
         hasUnsavedCategoryChanges = false;
         orderSaveWrap.style.display = 'none';
 
         renderCategories();
         renderProductsList();
-
-        catBox.style.display = 'block';
-        editorBox.style.display = 'block';
-        listBox.style.display = 'block';
         hideStatus();
       } catch (err) {
-        showStatus('error', `❌ Ошибка: ${err.message}`);
+        allCategories = [];
+        allProducts = [];
+        categoriesList.innerHTML = '';
+        productsList.innerHTML = '';
+        itemsCount.textContent = '0';
+
+        tgBotMessageBox.style.display = 'none';
+        catBox.style.display = 'none';
+        editorBox.style.display = 'none';
+        listBox.style.display = 'none';
+
+        console.error('Ошибка загрузки с GitHub:', err);
+        alert(`❌ Ошибка доступа к GitHub: ${err.message}\nПроверьте токен и данные в mysettings.js.`);
       }
     }
 
@@ -688,7 +1319,6 @@
       orderSaveWrap.style.display = 'flex';
     }
 
-    // Отрисовка категорий
     function renderCategories() {
       categoriesList.innerHTML = '';
       prodCategory.innerHTML = '';
@@ -782,7 +1412,7 @@
         await saveCategoriesToGithub('Обновлены разделы каталога');
         hasUnsavedCategoryChanges = false;
         orderSaveWrap.style.display = 'none';
-        showStatus('success', '✅ Все изменения разделов успешно сохранены в репозиторий одним коммитом!');
+        showStatus('success', '✅ Все изменения разделов успешно сохранены в репозиторий!');
       } catch (err) {
         showStatus('error', `❌ Ошибка сохранения разделов: ${err.message}`);
       } finally {
@@ -792,8 +1422,17 @@
 
     async function saveCategoriesToGithub(message) {
       const token = tokenInput.value.trim();
-      const owner = ownerInput.value.trim();
-      const repo = repoInput.value.trim();
+      const owner = window.MY_SETTINGS.github_owner;
+      const repo = window.MY_SETTINGS.github_repo;
+
+      const freshRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/categories.json?ref=main&t=${Date.now()}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (freshRes.ok) {
+        const freshData = await freshRes.json();
+        categoriesSha = freshData.sha;
+      }
+
       const content = btoa(unescape(encodeURIComponent(JSON.stringify(allCategories, null, 2))));
 
       const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/categories.json`, {
@@ -807,7 +1446,6 @@
       categoriesSha = data.content.sha;
     }
 
-    // Пагинация в админке
     function renderAdminPagination(totalItems) {
       const totalPages = Math.ceil(totalItems / ADMIN_ITEMS_PER_PAGE);
 
@@ -852,7 +1490,6 @@
       window.scrollTo({ top: listBox.offsetTop - 20, behavior: 'smooth' });
     };
 
-    // Отрисовка товаров с пагинацией
     function renderProductsList() {
       const query = adminSearchInput.value.trim().toLowerCase();
       
@@ -878,16 +1515,16 @@
       pageItems.forEach(item => {
         const catObj = allCategories.find(c => c.id === item.category);
         const catLabel = catObj ? catObj.name : item.category;
-        const img = item.images && item.images.length > 0 ? item.images[0] : '';
+        const img = item.images && item.images.length > 0 ? item.images[0] : 'nofoto.jpg';
 
         const row = document.createElement('div');
         row.className = 'list-row';
         row.innerHTML = `
           <div class="item-main">
-            <img src="${img}" class="item-thumb" onerror="this.src='https://via.placeholder.com/50'">
+            <img src="${img}" class="item-thumb" onerror="this.src='nofoto.jpg'">
             <div class="item-info">
               <div class="item-name">${item.title}</div>
-              <div class="item-meta">${item.price} • ${catLabel}</div>
+              <div class="item-meta">${item.price} ₽ • ${catLabel}</div>
             </div>
           </div>
           <div class="item-actions">
@@ -918,9 +1555,12 @@
 
       renderImagesSortList();
 
-      formHeader.textContent = `✏️ Редактирование: ${item.title}`;
+      formHeader.querySelector('span').textContent = `✏️ Редактирование: ${item.title}`;
       submitBtn.textContent = 'Сохранить изменения';
       cancelEditBtn.style.display = 'inline-block';
+      
+      tgPublishCheck.checked = false;
+
       window.scrollTo({ top: editorBox.offsetTop - 20, behavior: 'smooth' });
     };
 
@@ -932,23 +1572,28 @@
       formImages = [];
       imagesToDeleteFromGithub = [];
       renderImagesSortList();
-      formHeader.textContent = '➕ Добавить новый товар';
-      submitBtn.textContent = 'Опубликовать товар';
+      formHeader.querySelector('span').textContent = '➕ Добавить новый товар';
+      submitBtn.textContent = 'Выложить товар';
       cancelEditBtn.style.display = 'none';
+      tgPublishCheck.checked = true;
     }
 
-    // Сохранение товара (пакетный коммит через Git Data API в 1 действие)
+    // Сохранение товара (пакетный коммит через Git Data API)
     productForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const token = tokenInput.value.trim();
-      const owner = ownerInput.value.trim();
-      const repo = repoInput.value.trim();
+      const owner = window.MY_SETTINGS.github_owner;
+      const repo = window.MY_SETTINGS.github_repo;
+
+      const tgToken = tgTokenInput.value.trim();
+      const tgChannel = window.MY_SETTINGS.channel_username ? `@${window.MY_SETTINGS.channel_username.replace('@', '')}` : '';
+      const shouldPublishToTg = tgPublishCheck.checked && tgToken && tgChannel;
 
       submitBtn.disabled = true;
       showStatus('loading', '⏳ Подготовка файлов к отправке...');
 
       try {
-        const branchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/branches/main`, {
+        const branchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/branches/main?t=${Date.now()}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!branchRes.ok) throw new Error('Не удалось получить данные ветки main');
@@ -956,9 +1601,17 @@
         const baseCommitSha = branchData.commit.sha;
         const baseTreeSha = branchData.commit.commit.tree.sha;
 
+        const freshProdRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/products.json?ref=main&t=${Date.now()}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (freshProdRes.ok) {
+          const freshProdData = await freshProdRes.json();
+          productsSha = freshProdData.sha;
+          allProducts = JSON.parse(decodeURIComponent(escape(atob(freshProdData.content.replace(/\s/g, '')))));
+        }
+
         const treeItems = [];
 
-        // Помечаем старые фото на удаление
         if (imagesToDeleteFromGithub.length > 0) {
           for (const imgPath of imagesToDeleteFromGithub) {
             treeItems.push({
@@ -973,7 +1626,6 @@
         let finalImages = [];
         const timestamp = Date.now();
 
-        // Заливаем новые фото как Blobs (коммиты НЕ создаются)
         for (let i = 0; i < formImages.length; i++) {
           const item = formImages[i];
           if (item.type === 'existing') {
@@ -1011,7 +1663,7 @@
         }
 
         finalImages = finalImages.slice(0, 6);
-        if (finalImages.length === 0) finalImages = ['https://via.placeholder.com/300'];
+        if (finalImages.length === 0) finalImages = ['nofoto.jpg'];
 
         const isEdit = Boolean(editItemId.value);
         const idToUpdate = isEdit ? parseInt(editItemId.value) : Date.now();
@@ -1032,7 +1684,6 @@
           allProducts.unshift(updatedItem);
         }
 
-        // Кладём products.json прямо в дерево
         treeItems.push({
           path: 'products.json',
           mode: '100644',
@@ -1042,7 +1693,6 @@
 
         showStatus('loading', '⏳ Создание единого коммита...');
 
-        // 1. Создаём Tree с изменениями
         const treeRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -1054,7 +1704,6 @@
         if (!treeRes.ok) throw new Error(`Ошибка создания tree: ${treeRes.statusText}`);
         const treeData = await treeRes.json();
 
-        // 2. Создаём Commit
         const commitMessage = isEdit ? `Обновлен товар: ${updatedItem.title}` : `Добавлен товар: ${updatedItem.title}`;
         const commitRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/commits`, {
           method: 'POST',
@@ -1068,7 +1717,6 @@
         if (!commitRes.ok) throw new Error(`Ошибка создания коммита: ${commitRes.statusText}`);
         const commitData = await commitRes.json();
 
-        // 3. Сдвигаем ветку main на новый коммит
         const updateRefRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/refs/heads/main`, {
           method: 'PATCH',
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -1079,7 +1727,154 @@
         });
         if (!updateRefRes.ok) throw new Error(`Ошибка обновления ветки: ${updateRefRes.statusText}`);
 
-        showStatus('success', '✅ Товар и фото успешно сохранены строго одним коммитом!');
+        // Отправка в Telegram-канал
+        let tgSentSuccess = true;
+        let tgErrorMessage = '';
+
+        if (shouldPublishToTg) {
+          showStatus('loading', '⏳ Публикация новинки в Telegram-канал...');
+          try {
+            const rawBase = window.MY_SETTINGS.github_raw_base_url;
+
+            const firstImg = (updatedItem.images && updatedItem.images.length > 0) ? updatedItem.images[0] : '';
+            const isRealPhoto = firstImg && !firstImg.includes('nofoto.jpg');
+            let photoUrl = '';
+            if (isRealPhoto) {
+              photoUrl = firstImg.startsWith('images/')
+                ? `${rawBase}/${firstImg}`
+                : firstImg;
+            } else {
+              photoUrl = `${rawBase}/nofoto.jpg`;
+            }
+
+            const botUsername = window.MY_SETTINGS.bot_username;
+            const miniAppName = window.MY_SETTINGS.miniapp_name;
+            const miniAppUrl = `https://t.me/${botUsername}/${miniAppName}?startapp=item_${updatedItem.id}_from_channel`;
+            
+            const userPrice = String(updatedItem.price || '').trim();
+            const orderTemplate = window.MY_SETTINGS.order_message_template;
+            const orderMsg = orderTemplate
+              .replace('{title}', updatedItem.title)
+              .replace('{price}', userPrice);
+            const botOrderUrl = `https://t.me/${botUsername}?text=${encodeURIComponent(orderMsg)}`;
+            
+            const catalogBase = window.MY_SETTINGS.catalog_base_url;
+            const browserCatalogUrl = `${catalogBase}/index.html?item=${updatedItem.id}`;
+            const escapeHtml = (str) => String(str || '')
+              .replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;');
+
+            function parseCustomMarkdown(text) {
+              if (!text) return '';
+              let s = escapeHtml(text);
+
+              s = s.replace(/\*\*\*_(.*?)_?\*\*\*/g, '<b><i><u>$1</u></i></b>');
+              s = s.replace(/(\*\*_|_\*\*)(.*?)(_\*\*|\*\*_)/g, '<i><u>$2</u></i>');
+              s = s.replace(/(\*_|_\*)(.*?)(_\*|\*_)/g, '<b><u>$2</u></b>');
+              s = s.replace(/\*\*(.*?)\*\*/g, '<i>$1</i>');
+              s = s.replace(/\*(.*?)\*/g, '<b>$1</b>');
+              s = s.replace(/_(.*?)_/g, '<u>$1</u>');
+
+              const openStack = [];
+              const tagRegex = /<\/?([biu])>/g;
+              let match;
+              while ((match = tagRegex.exec(s)) !== null) {
+                const fullTag = match[0];
+                const tagName = match[1];
+                if (!fullTag.startsWith('</')) {
+                  openStack.push(tagName);
+                } else {
+                  if (openStack.length > 0 && openStack[openStack.length - 1] === tagName) {
+                    openStack.pop();
+                  }
+                }
+              }
+
+              while (openStack.length > 0) {
+                s += `</${openStack.pop()}>`;
+              }
+
+              return s;
+            }
+
+            let rawDesc = (updatedItem.desc || '');
+            let isLong = rawDesc.length > 150;
+            let targetText = rawDesc;
+
+            if (isLong) {
+              let cut = rawDesc.slice(0, 150);
+              if ((cut.match(/\*\*\*/g) || []).length % 2 !== 0) cut += '***';
+              else if ((cut.match(/\*\*/g) || []).length % 2 !== 0) cut += '**';
+              else if ((cut.match(/\*/g) || []).length % 2 !== 0) cut += '*';
+              if ((cut.match(/_/g) || []).length % 2 !== 0) cut += '_';
+              targetText = cut + '...';
+            }
+
+            let formattedDesc = parseCustomMarkdown(targetText);
+
+            const safeTitle = escapeHtml(updatedItem.title);
+            const safePrice = escapeHtml(updatedItem.price);
+
+            const postHeader = isEdit 
+              ? `🔄 <i>Обновление товара в каталоге!</i>` 
+              : `🔥 <i>Новинка в каталоге!</i>`;
+
+            const caption = 
+              `${postHeader}\n\n` +
+              `📦 <b>${safeTitle}</b>\n` +
+              `💰 <b><u>Цена:</u></b> <b>${safePrice} ₽</b>\n\n` +
+              `${formattedDesc}\n\n` +
+              `⬇️ <i>Заказывайте прямо сейчас</i> ⬇️`;
+
+            const tgRes = await fetch(`https://api.telegram.org/bot${tgToken}/sendPhoto`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                chat_id: tgChannel,
+                photo: photoUrl,
+                caption: caption,
+                parse_mode: 'HTML',
+                reply_markup: {
+                  inline_keyboard: [
+                    [ { text: '💬 Написать мастеру', url: botOrderUrl } ],
+                    [ { text: '📱 Открыть в приложении', url: miniAppUrl } ],
+                    [ { text: '🌐 Открыть в каталоге', url: browserCatalogUrl } ]
+                  ]
+                }
+              })
+            });
+
+            const tgData = await tgRes.json();
+            if (!tgData.ok) {
+              tgSentSuccess = false;
+              tgErrorMessage = tgData.description || 'Не удалось отправить фото';
+              console.warn('Ошибка Telegram:', tgData);
+            }
+          } catch (tgErr) {
+            tgSentSuccess = false;
+            tgErrorMessage = tgErr.message;
+            console.warn('Ошибка сети Telegram:', tgErr);
+          }
+        }
+
+        // Итоговый статус
+        if (shouldPublishToTg && !tgSentSuccess) {
+          showStatus('warning', `⚠️ Товар сохранён в каталоге, но в Telegram не ушёл: ${tgErrorMessage}`);
+        } else {
+          let successText = '';
+          if (isEdit) {
+            successText = shouldPublishToTg 
+              ? '✅ Изменения товара сохранены на GitHub и опубликованы в Telegram!' 
+              : '✅ Изменения товара успешно сохранены на GitHub!';
+          } else {
+            successText = shouldPublishToTg 
+              ? '✅ Новый товар успешно сохранён на GitHub и опубликован в Telegram!' 
+              : '✅ Новый товар успешно сохранён на GitHub!';
+          }
+          showStatus('success', successText);
+        }
+
         resetForm();
         renderProductsList();
       } catch (err) {
@@ -1113,8 +1908,17 @@
 
     async function saveProductsToGithub(message) {
       const token = tokenInput.value.trim();
-      const owner = ownerInput.value.trim();
-      const repo = repoInput.value.trim();
+      const owner = window.MY_SETTINGS.github_owner;
+      const repo = window.MY_SETTINGS.github_repo;
+
+      const freshRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/products.json?ref=main&t=${Date.now()}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (freshRes.ok) {
+        const freshData = await freshRes.json();
+        productsSha = freshData.sha;
+      }
+
       const content = btoa(unescape(encodeURIComponent(JSON.stringify(allProducts, null, 2))));
 
       const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/products.json`, {
@@ -1129,13 +1933,24 @@
     }
 
     function showStatus(type, msg) {
+      if (window.statusAutoClearTimer) {
+        clearTimeout(window.statusAutoClearTimer);
+      }
       statusMsg.className = `status-msg ${type}`;
       statusMsg.textContent = msg;
+      statusMsg.style.display = 'block';
+
+      if (type === 'success' || type === 'warning') {
+        window.statusAutoClearTimer = setTimeout(() => {
+          hideStatus();
+        }, type === 'warning' ? 8000 : 5000);
+      }
     }
 
     function hideStatus() {
       statusMsg.className = 'status-msg';
       statusMsg.style.display = 'none';
+      statusMsg.textContent = '';
     }
   </script>
 </body>

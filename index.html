@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Каталог товаров - Pogodin_3d</title>
+  <script src="mysettings.js"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link rel="icon" type="image/png" href="logo.png">
   <style>
     :root {
@@ -59,7 +61,12 @@
       align-items: center;
       margin-bottom: 16px;
     }
-    .nav-links { display: flex; gap: 10px; }
+    .nav-links { 
+     display: flex; 
+     gap: 8px; 
+     flex-wrap: wrap; 
+     align-items: center; 
+    }
     .nav-btn {
       background: var(--btn-nav-bg);
       color: var(--btn-nav-text);
@@ -370,6 +377,7 @@
       display: -webkit-box;
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 3;
+      line-clamp: 3;
       word-break: break-word;
     }
 
@@ -412,7 +420,7 @@
       display: flex; 
       flex-direction: row; 
       gap: 10px; 
-      flex-shrink: 0;
+      flex-shrink: 0; 
       flex-wrap: wrap;
     }
     .btn {
@@ -786,6 +794,13 @@
       <div class="nav-links">
         <a href="delivery.html" class="nav-btn">Доставка</a>
         <a href="about.html" class="nav-btn">Обо мне</a>
+        <a href="#" target="_blank" class="nav-btn nav-btn-tg" id="channelLinkBtn">
+          <!-- Иконка бумажного самолётика Telegram -->
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block; vertical-align:-2px; margin-right:4px;">
+            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.458c.538-.196 1.006.128.832.969z"/>
+          </svg>
+          Канал
+        </a>
       </div>
       <button class="theme-toggle-btn" id="themeToggleBtn" title="Переключить тему">🌙</button>
     </div>
@@ -861,11 +876,11 @@
   </div>
 
   <script>
-    const TG_USERNAME = "pogodin_3d_bot";
-    const INST_USERNAME = "Pogodin_3d";
+    const TG_USERNAME = window.MY_SETTINGS.bot_username;
+    const INST_USERNAME = window.MY_SETTINGS.instagram_username;
     const ITEMS_PER_PAGE = 10;
 
-    const NO_PHOTO_PLACEHOLDER = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400"><rect width="100%" height="100%" fill="%2318181b"/><g transform="translate(250,75) scale(4.2)" stroke="%233f3f46" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></g><text x="50%" y="275" dominant-baseline="middle" text-anchor="middle" fill="%2371717a" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="32" font-weight="900" letter-spacing="2">ФОТО ОТСУТСТВУЕТ</text></svg>';
+    const NO_PHOTO_PLACEHOLDER = 'nofoto.jpg';
 
     let categories = { all: "Все товары" };
     let currentCategory = 'all';
@@ -913,6 +928,12 @@
         .replace(/_(.*?)_/g, '<u>$1</u>');
     }
 
+    function formatPrice(price) {
+      if (!price) return 'По запросу';
+      const p = String(price).trim();
+      return `${p} ₽`;
+    }
+
     const savedTheme = localStorage.getItem('theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
     themeToggleBtn.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
@@ -938,9 +959,102 @@
     document.addEventListener('click', () => dropdownMenu.classList.remove('show'));
 
     async function initCatalog() {
+
+      // Подставляем ссылку на Telegram-канал из mysettings.js и настраиваем бронебойный клик
+      const channelBtn = document.getElementById('channelLinkBtn');
+      if (channelBtn && window.MY_SETTINGS && window.MY_SETTINGS.channel_username) {
+        const targetChannel = window.MY_SETTINGS.channel_username.replace('@', '').trim().toLowerCase();
+        const channelUrl = `https://t.me/${targetChannel}`;
+        channelBtn.href = channelUrl;
+
+        channelBtn.addEventListener('click', (e) => {
+          // Если открыто внутри Telegram Mini App
+          if (window.Telegram && window.Telegram.WebApp) {
+            e.preventDefault();
+
+            const tg = window.Telegram.WebApp;
+            const unsafe = tg.initDataUnsafe || {};
+            const urlParams = new URLSearchParams(window.location.search);
+
+            // 1. Проверяем chat_type от самого Telegram
+            const isChannelType = unsafe.chat_type === 'channel';
+
+            // 2. Проверяем юзернейм чата, если он передан в объекте chat
+            const currentChatUser = (unsafe.chat?.username || '').replace('@', '').toLowerCase();
+            const isSameChannel = currentChatUser && currentChatUser === targetChannel;
+
+            // 3. Проверяем стартовый параметр или параметр ссылки (?from=channel или tgWebAppStartParam)
+            const isFromChannelParam = urlParams.get('from') === 'channel' || 
+                                       urlParams.get('mode') === 'channel' ||
+                                       (unsafe.start_param && unsafe.start_param.includes('channel'));
+
+            // Если хотя бы один фактор подтверждает, что мы поверх канала:
+            if (isChannelType || isSameChannel || isFromChannelParam) {
+              showToast('Вы уже находитесь в нашем канале! Просто смахните шторку вниз.');
+              return;
+            }
+
+            // Если открыто из другого места (из бота или лички) — переводим в канал
+            if (typeof tg.openTelegramLink === 'function') {
+              tg.openTelegramLink(channelUrl);
+            } else {
+              window.location.href = channelUrl;
+            }
+          }
+        });
+      }
+
+      // 1. Проверяем обычный GET-параметр из адресной строки (?item=...)
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.has('item')) {
         singleItemId = urlParams.get('item');
+      }
+      
+      // ДОБАВЛЯЕМ ВОТ ЭТИ 3 СТРОЧКИ: перехват ?cat=
+      if (urlParams.has('cat')) {
+        currentCategory = urlParams.get('cat').trim();
+      }
+
+            // 2. Бронебойный перехват Telegram Mini App
+      if (!singleItemId) {
+        let appParam = '';
+
+        // Вариант А: из нативного SDK Telegram WebApp
+        if (window.Telegram && window.Telegram.WebApp) {
+          try {
+            window.Telegram.WebApp.ready();
+            appParam = window.Telegram.WebApp.initDataUnsafe?.start_param || '';
+          } catch (e) {
+            console.warn('TG SDK error:', e);
+          }
+        }
+
+        // Вариант Б: из хэша адресной строки
+        if (!appParam && window.location.hash) {
+          try {
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            appParam = hashParams.get('tgWebAppStartParam') || '';
+          } catch (e) {
+            console.warn('TG Hash parse error:', e);
+          }
+        }
+
+        // Если получен параметр запуска Mini App
+        if (appParam) {
+          // Если это ссылка на конкретный товар
+          if (appParam.startsWith('item_')) {
+            singleItemId = appParam.replace(/^item_/, '').replace(/_from_channel.*$/, '').trim();
+          } 
+          // Если это ссылка на раздел
+          else if (appParam.startsWith('cat_')) {
+            currentCategory = appParam.replace(/^cat_/, '').replace(/_from_channel.*$/, '').trim();
+          }
+        }
+      }
+
+      // Чистим ID от случайных пробелов и символов
+      if (singleItemId) {
+        singleItemId = String(singleItemId).trim();
       }
 
       try {
@@ -967,7 +1081,7 @@
       dropdownMenu.innerHTML = '';
       for (const [id, name] of Object.entries(categories)) {
         let count = 0;
-        if (id === 'all' || id === 'new') {
+        if (id === 'all') {
           count = products.length;
         } else {
           count = products.filter(p => p.category === id).length;
@@ -986,26 +1100,29 @@
           resetViewWrap.style.display = 'none';
           searchWrap.style.display = 'block';
           dropdownWrap.style.display = 'block';
-          window.history.pushState({}, '', window.location.pathname);
+          if (id === 'all') {
+            window.history.pushState({}, '', window.location.pathname);
+          } else {
+            window.history.pushState({}, '', `${window.location.pathname}?cat=${id}`);
+          }
           renderProducts();
         });
         dropdownMenu.appendChild(item);
       }
     }
 
-    // Дебаунс поиска с паузой в 1 секунду (1000 мс)
+    // Дебаунс поиска с паузой
     let searchDebounceTimer = null;
     searchInput.addEventListener('input', () => {
       clearTimeout(searchDebounceTimer);
       
-      // Показываем, что поиск ждёт паузы
-      searchInput.style.borderColor = '#f59e0b'; // желтая рамка пока печатаешь
+      searchInput.style.borderColor = '#f59e0b';
 
       searchDebounceTimer = setTimeout(() => {
         currentPage = 1;
         renderProducts();
-        searchInput.style.borderColor = ''; // возвращаем цвет рамки
-      }, 500); // Ровно 1 секунда паузы после последнего нажатия клавиши!
+        searchInput.style.borderColor = '';
+      }, 500);
     });
 
     window.resetSingleView = function() {
@@ -1047,8 +1164,12 @@
       const item = products.find(p => p.id === productId);
       if (!item) return;
 
-      const rawPrice = String(item.price).replace(/[^\d\s.,]/g, '').trim();
-      const msgText = `Здравствуйте! Хочу сделать заказ в Pogodin_3d: "${item.title}" за ${rawPrice} рублей. Подскажите по срокам изготовления.`;
+      const displayPrice = formatPrice(item.price);
+      const userPrice = String(item.price || '').trim();
+      const msgTemplate = window.MY_SETTINGS.order_message_template;
+      const msgText = msgTemplate
+        .replace('{title}', item.title)
+        .replace('{price}', userPrice);
       const tgLink = `https://t.me/${TG_USERNAME}?text=${encodeURIComponent(msgText)}`;
       const instLink = `https://ig.me/m/${INST_USERNAME}`;
 
@@ -1065,7 +1186,7 @@
         modalThumbsHtml = `
           <div class="thumbnails">
             ${validImages.map((img, idx) => `
-              <img src="${img}" class="thumb-img ${idx === 0 ? 'active' : ''}" loading="lazy" decoding="async" onerror="this.onerror=null; this.src=NO_PHOTO_PLACEHOLDER;" onclick="changeModalImage(this, ${item.id}, ${idx})">
+              <img src="${img}" class="thumb-img ${idx === 0 ? 'active' : ''}" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='nofoto.jpg';" onclick="changeModalImage(this, ${item.id},${idx})">
             `).join('')}
           </div>
         `;
@@ -1074,7 +1195,7 @@
       const imgClickAttr = hasImages ? `onclick="openLightbox(${item.id})" title="Нажмите, чтобы увеличить"` : `style="cursor:default;"`;
 
       modalGallery.innerHTML = `
-        <img src="${firstImg}" alt="${item.title}" class="detail-modal-main-img" id="modal-main-img-${item.id}" data-active-index="0" decoding="async" onerror="this.onerror=null; this.src=NO_PHOTO_PLACEHOLDER;" ${imgClickAttr}>
+        <img src="${firstImg}" alt="${item.title}" class="detail-modal-main-img" id="modal-main-img-${item.id}" data-active-index="0" decoding="async" onerror="this.onerror=null; this.src='nofoto.jpg';" ${imgClickAttr}>
         ${modalThumbsHtml}
       `;
 
@@ -1084,7 +1205,7 @@
         <div class="detail-modal-footer">
           <div class="card-price">
             <span class="price-label">Цена:</span>
-            <span class="price-value">${rawPrice} ₽</span>
+            <span class="price-value">${displayPrice}</span>
           </div>
           <div class="actions">
             <a href="${tgLink}" target="_blank" class="btn btn-tg">Заказать в Telegram</a>
@@ -1184,7 +1305,7 @@
       } else if (query) {
         filtered = products.filter(p => p.title.toLowerCase().includes(query) || p.desc.toLowerCase().includes(query));
         categoryTitle.textContent = `Результаты поиска (${filtered.length})`;
-      } else if (currentCategory === 'all' || currentCategory === 'new') {
+      } else if (currentCategory === 'all') {
         filtered = [...products];
         categoryTitle.textContent = `Все товары (${filtered.length})`;
       } else {
@@ -1215,8 +1336,12 @@
       const fragment = document.createDocumentFragment();
 
       pageItems.forEach((item, itemIdx) => {
-        const rawPrice = String(item.price).replace(/[^\d\s.,]/g, '').trim();
-        const msgText = `Здравствуйте! Хочу сделать заказ в Pogodin_3d: "${item.title}" за ${rawPrice} рублей. Подскажите по срокам изготовления.`;
+        const displayPrice = formatPrice(item.price);
+        const userPrice = String(item.price || '').trim();
+        const msgTemplate = window.MY_SETTINGS.order_message_template;
+        const msgText = msgTemplate
+          .replace('{title}', item.title)
+          .replace('{price}', userPrice);
         const tgLink = `https://t.me/${TG_USERNAME}?text=${encodeURIComponent(msgText)}`;
         const instLink = `https://ig.me/m/${INST_USERNAME}`;
 
@@ -1230,7 +1355,7 @@
           thumbnailsHtml = `
             <div class="thumbnails">
               ${validImages.map((img, idx) => `
-                <img src="${img}" class="thumb-img ${idx === 0 ? 'active' : ''}" loading="lazy" decoding="async" data-main-target="main-img-${item.id}" data-idx="${idx}" onerror="this.onerror=null; this.src=NO_PHOTO_PLACEHOLDER;" onclick="changeImage(this, ${item.id}, ${idx})">
+                <img src="${img}" class="thumb-img ${idx === 0 ? 'active' : ''}" loading="lazy" decoding="async" data-main-target="main-img-${item.id}" data-idx="${idx}" onerror="this.onerror=null; this.src='nofoto.jpg';" onclick="changeImage(this, ${item.id},${idx})">
               `).join('')}
             </div>
           `;
@@ -1250,7 +1375,7 @@
             </svg>
           </button>
           <div class="card-gallery">
-            <img src="${firstImg}" alt="${item.title}" class="main-img" id="main-img-${item.id}" data-active-index="0" loading="${imgLoading}" decoding="async" onerror="this.onerror=null; this.src=NO_PHOTO_PLACEHOLDER;" ${imgClickAttr}>
+            <img src="${firstImg}" alt="${item.title}" class="main-img" id="main-img-${item.id}" data-active-index="0" loading="${imgLoading}" decoding="async" onerror="this.onerror=null; this.src='nofoto.jpg';" ${imgClickAttr}>
             ${thumbnailsHtml}
           </div>
           <div class="card-content">
@@ -1262,7 +1387,7 @@
             <div class="card-footer">
               <div class="card-price">
                 <span class="price-label">Цена:</span>
-                <span class="price-value">${rawPrice} ₽</span>
+                <span class="price-value">${displayPrice}</span>
               </div>
               <div class="actions">
                 <a href="${tgLink}" target="_blank" class="btn btn-tg">Заказать в Telegram</a>
@@ -1465,7 +1590,7 @@
     window.addEventListener('mousemove', (e) => {
       if (!isMouseDown) return;
       const dx = e.clientX - mouseStartX;
-      dy = e.clientY - mouseStartY;
+      const dy = e.clientY - mouseStartY;
 
       if (Math.hypot(dx, dy) > 5) {
         mouseHasMoved = true;
@@ -1578,7 +1703,80 @@
       }
     }, { passive: true });
 
+    document.addEventListener('click', (e) => {
+      const tgBtn = e.target.closest('a.btn-tg');
+      if (!tgBtn) return;
+
+      // Если мы открыты внутри Telegram Mini App
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
+        e.preventDefault();
+
+        const url = new URL(tgBtn.href);
+        const textParam = url.searchParams.get('text') || '';
+        const orderText = decodeURIComponent(textParam);
+        const tg = window.Telegram.WebApp;
+
+        // Проверяем явный маркер: открыто ли именно с Menu Button слева от ввода
+        const urlParams = new URLSearchParams(window.location.search);
+        const isMenuButton = urlParams.get('mode') === 'menu';
+
+        // ========================================================
+        // СЦЕНАРИЙ А: КНОПКА МЕНЮ СЛЕВА ОТ ВВОДА (mode=menu)
+        // ========================================================
+        if (isMenuButton) {
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(orderText).catch(() => {});
+          }
+
+          showToast('Текст заказа скопирован! Смахните шторку вниз и вставьте в чат.');
+          return;
+        }
+
+        // ========================================================
+        // СЦЕНАРИЙ Б: ИЗ СПИСКА ЧАТОВ / КАНАЛА (Main App)
+        // ========================================================
+        if (typeof tg.openTelegramLink === 'function') {
+          tg.openTelegramLink(tgBtn.href);
+        } else {
+          window.location.href = tgBtn.href;
+        }
+        return;
+      }
+    });
+
     initCatalog();
+  
+    function showToast(message) {
+      let toast = document.getElementById('orderToast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'orderToast';
+        toast.style.position = 'fixed';
+        toast.style.bottom = '30px';
+        toast.style.left = '50%';
+        toast.style.transform = 'translateX(-50%)';
+        toast.style.background = '#16a34a';
+        toast.style.color = '#fff';
+        toast.style.padding = '12px 20px';
+        toast.style.borderRadius = '10px';
+        toast.style.fontSize = '14px';
+        toast.style.fontWeight = '700';
+        toast.style.zIndex = '99999';
+        toast.style.boxShadow = '0 10px 30px rgba(0,0,0,0.6)';
+        toast.style.textAlign = 'center';
+        toast.style.width = '88%';
+        toast.style.maxWidth = '360px';
+        document.body.appendChild(toast);
+      }
+
+      toast.textContent = message;
+      toast.style.display = 'block';
+
+      if (window.toastTimeout) clearTimeout(window.toastTimeout);
+      window.toastTimeout = setTimeout(() => {
+        if (toast) toast.style.display = 'none';
+      }, 3500);
+    }
   </script>
 </body>
 </html>

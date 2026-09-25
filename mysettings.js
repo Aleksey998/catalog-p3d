@@ -5,7 +5,7 @@
 window.MY_SETTINGS = {
   // Привязка GitHub (для работы базы данных и загрузки картинок)
   github_owner: "aleksey998",
-  github_repo: "catalog3dfortest",
+  github_repo: "catalog-p3d",
 
   // Юзернейм Telegram-бота для заказов (кнопка "заказать в телеграмм")
   bot_username: "pogodin_3d_bot",
@@ -28,9 +28,9 @@ window.MY_SETTINGS = {
 
   // Прямой адрес работающего сайта каталога в браузере (нужен для кнопки "окрыть в браузере" в посте в телеграмме)
   // Сюда потом вставить ссылку на сайт vercell
-  catalog_base_url: "https://aleksey998.github.io/catalog3dfortest",
+  catalog_base_url: "https://catalog-p3d.vercel.app/",
 
   // Прямой базовый URL для сырых файлов (нужна для отправки фото товара в телеграмм при публикации новинки и обновления)
   // Сюда потом вставить имя своего репозитория каталога
-  github_raw_base_url: "https://raw.githubusercontent.com/aleksey998/catalog3dfortest/main"
+  github_raw_base_url: "https://raw.githubusercontent.com/aleksey998/catalog-p3d/main"
 };
